@@ -1,0 +1,17 @@
+objects:
+
+  Ship:
+    seaworthy: true (until all compartments.damage == true)
+    compartments: array(2<>5 of object Compartment)
+    rotation: 0, 90, 180, 270
+    coordinates: [0<>9, 0<>9]
+
+  Compartment:
+    damaged: false
+    coordinates: [0<>9, 0<>9]
+    icon: image
+
+
+  Grid:
+    player: 1 || 2
+    size: 10x10
