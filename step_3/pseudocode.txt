@@ -1,6 +1,7 @@
 objects:
 
   Ship:
+    name: [every ship will have a historically accurate name, from of American ships (player 1) and Japanese ships (player 2) of the same class of ship]
     seaworthy: true (until all compartments.damage == true)
     compartments: array(2<>5 of object Compartment)
     rotation: 0, 90, 180, 270
@@ -9,9 +10,61 @@ objects:
   Compartment:
     damaged: false
     coordinates: [0<>9, 0<>9]
-    icon: image
+    icon: image [unique images for each section of any and all ships. this allows a unique tile for a hit marker]
 
 
   Grid:
     player: 1 || 2
-    size: 10x10
+    size: [10x10 of object Tile]
+
+  Tile:
+    has_ship: false
+    hit: false
+    icon: image [water texture]
+
+
+
+functions:
+
+  fire_at_coords(x,y) {
+    // checks the Tile that was clicked on if it was hit
+    // if hit == false {
+      // check if the Tile has a Compartment {
+        // if has_ship == true {
+          return ship_hit(player, x, y)
+        }
+      }
+    }
+  }
+
+
+  ship_hit(player, x, y) {
+    alert player that their ship has been hit when the turn changes (might take a bit to get working)
+    set Compartment.damaged = true
+    set Compartment.icon = damaged design
+    return
+  }
+
+
+
+style elements:
+
+  ship names:
+
+    Player 1 (USA):
+
+      Aircraft Carrier  : USS Yorktown
+      Battleship        : USS Missouri
+      Destroyer         : USS Cassin Young
+      Submarine         : USS Barracuda
+      Patrol Boat       : USS Barfly
+
+    Player 2 (Japan):
+
+      Aircraft Carrier  : IJN Akagi
+      Battleship        : IJN Yamato
+      Destroyer         : IJN Yukikaze
+      Submarine         : IJN Kaidai
+      Patrol Boat       : IJN Ryuuho
+
+
