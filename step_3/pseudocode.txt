@@ -1,6 +1,7 @@
 objects:
 
   Ship:
+    type: ac, bt, ds, sb, pt
     name: [every ship will have a historically accurate name, from of American ships (player 1) and Japanese ships (player 2) of the same class of ship]
     seaworthy: true (until all compartments.damage == true)
     compartments: array(2<>5 of object Compartment)
@@ -11,11 +12,13 @@ objects:
     damaged: false
     coordinates: [0<>9, 0<>9]
     icon: image [unique images for each section of any and all ships. this allows a unique tile for a hit marker]
+    rotation_icon: relative to parent ship rotation
+
 
 
   Grid:
-    player: 1 || 2
-    size: [10x10 of object Tile]
+    Player: 1 || -1
+    size: [10x10 of object Tile] (three values: 0=empty, -1=miss, 1=hit)
 
   Tile:
     has_ship: false
@@ -23,32 +26,120 @@ objects:
     icon: image [water texture]
 
 
+  Player:
+
+    username: string
+    position: 1 || -1
+    hits: 0
+    ships_left: 5
+    shots_fired: 0
+    password: string (set on initialisation of game)
+
+    ship_locations: [[ac.coordinates],[bt.coordinates],[ds.coordinates],[sb.coordinates],[pt.coordinates]]
+
+
+global variables:
+  user_turn: 1
+  last_impact = [false, ship, x, y]
+
 
 functions:
 
   fire_at_coords(x,y) {
     // checks the Tile that was clicked on if it was hit
-    // if hit == false {
-      // check if the Tile has a Compartment {
-        // if has_ship == true {
+    if hit == false {
+      if Tile has Compartment {
+        if has_ship == true {
           return ship_hit(player, x, y)
         }
+        return false
       }
+
     }
   }
 
 
   ship_hit(player, x, y) {
-    alert player that their ship has been hit when the turn changes (might take a bit to get working)
+    last_impact[0] = true;
     set Compartment.damaged = true
     set Compartment.icon = damaged design
+    return true
+  }
+
+
+
+  turn_swap() {
+    // changes the perspective
+    display Turn Change screen (option for password and to quit game if you forgot your password)
+    password_check()
+  }
+
+
+
+  password_check() {
+    if document_password_box_input == player_x_pass return true
+    return password_check()
+  }
+
+
+
+  set_passwords() {
+    display password screen
+    display PLAYER 2 LOOK AWAY
+    player 1 types in a chosen username
+    player 1 types password into password box and confirm pass box
+    switch screen
+    display PLAYER 1 LOOK AWAY
+    player 2 types into a password box
+    player 2 types password into password box
     return
   }
 
 
 
-style elements:
+  mouseClicked() {
+    fire_at_coords(){}
+  }
 
+
+  turn(active, opponent, deploy = false) {
+    password_check()
+    display active.grid, opponent.grid
+    display active.ships
+
+    if deploy = true {
+      player places ships
+      return
+    }
+
+    if last_impact == true {
+      display "Your ship "last_impact[1]" was hit at coordinates "last_impact[2], last_impact[3]"!
+    }
+
+
+    mouseClicked()
+  }
+
+
+
+  main() {
+    // all the main code n stuff
+    set_passwords()
+    // these two are for ship placement
+    turn(1, true)
+    turn(-1, true)
+
+    while player_1.ships_left > 0 && player_2.ships_left > 0 {
+      // this is for the players turns, will run until somebody loses all their ships
+      turn(user_turn)
+      user_turn *= -1
+    }
+  }
+
+
+
+style elements:
+  // this probably isn't necessary at this point lol but i wanna do it soo
   ship names:
 
     Player 1 (USA):
