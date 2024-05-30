@@ -98,7 +98,8 @@ functions:
 
 
   mouseClicked() {
-    fire_at_coords(){}
+    // math to get grid coords from mouse coords
+    fire_at_coords(x,y){}
   }
 
 
@@ -121,10 +122,17 @@ functions:
   }
 
 
+  grid_gen() {
+    // loop to generate 10x10 canvas four times, one for each player's ship locations and targeting grid
+    // location grids are at (0,0), targeting grids are offset from that
+  }
+
+
 
   main() {
     // all the main code n stuff
     set_passwords()
+    grid_gen()
     // these two are for ship placement
     turn(1, true)
     turn(-1, true)
