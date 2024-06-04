@@ -18,12 +18,12 @@ const X = CVS_WIDTH / COLS;
 const Y = CVS_HEIGHT / ROWS;
 
 let loc_p1_cvs;
-// let loc_p2_cvs;
+let loc_p2_cvs;
 // let tgt_p1_cvs;
 // let tgt_p2_cvs;
 
 let loc_p1_grid = [];
-// let tgt_p1_grid = [];
+let loc_p2_grid = [];
 
 
 
@@ -41,6 +41,18 @@ class Tile {
 
 
 
+class Compartment {
+  #coords;
+  bingus;
+
+  constructor(coords) {
+    this.#coords = coords
+    this.bingus = "bingus";
+  }
+}
+
+
+
 class Ship {
   #type = ""
   #seaworthy = true; // if ship is still alive
@@ -51,7 +63,7 @@ class Ship {
 
   constructor(length, type, name, coordinates, rotation) {
     this.#type = type;
-    this.#length = new Array(length);
+    this.#length = new Array(length).fill(Compartment);
     this.#name = name;
     this.#coordinates = coordinates;
     this.#rotation = rotation;
@@ -59,6 +71,8 @@ class Ship {
 
 
   get name() {return this.#name}
+  get length() {return this.#length}
+  get coordinates() {return this.#coordinates}
 
   set coordinates(item) {this.#coordinates = item}
   set rotation(item) {this.#rotation = item}
@@ -102,10 +116,10 @@ class Player {
 
   }
 
+  get username() {return this.#username}
+  set username(item) {this.#username = item}
 
   set setPassword(item) {this.#password = item}
-  set setUsername(item) {this.#username = item}
-  get username() {return this.#username}
   get ships() {return this.#ships}
 }
 
@@ -113,7 +127,7 @@ class Player {
 
 function setup() {
   loc_p1_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-  // // loc_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
+  // loc_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
   // tgt_p1_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
   // // tgt_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
 
@@ -146,10 +160,10 @@ function grid_gen(grid) {
 
 function shipPlacement(player) {
 
-  loc_p1_grid[3][3].colour = ["gray"];
-
   // place ships in descending length
   // ac, bt, ds, sb, pt
+
+  drawShip(player.ships[1])
 
 }
 
@@ -173,11 +187,11 @@ function draw_grid(x, y) {
   let x_buffer = (CVS_WIDTH - width*x)/2
   let y_buffer = (CVS_HEIGHT - height*y)/2
 
-  stroke([0,125,230]);
+  noStroke()
   for (let row = 0; row < y; row++) {
     for (let col = 0; col < x; col++) {
       // Fill the square with the r,g,b values from the model
-      fill(...loc_p1_grid[row][col].colour);
+      fill(loc_p1_grid[row][col].colour);
       rect(col*width + x_buffer, row*height + y_buffer, width, height);
     }
   }
@@ -188,12 +202,18 @@ function draw_grid(x, y) {
 function initGame() {
   let player_1 = new Player(1);
   let player_2 = new Player(-1);
-  // player_1.setUsername("Player 1")
-  console.log(player_1, "hello")
-  console.log(player_1.ships[2].name)
+
 
 
   shipPlacement(player_1);
   shipPlacement(player_2);
 }
 
+
+function drawShip(ship,x=2,y=3) {
+  console.log(ship);
+  console.log(ship.length[0])
+  for (let i = 0; i < ship.length.length; i++) {
+    // loc_p1_grid[ship.length[i].coords[0]][ship.length[i].coords[1]].colour = "gray"
+  }
+}
