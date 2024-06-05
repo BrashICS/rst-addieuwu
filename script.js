@@ -273,10 +273,11 @@ function placeShip(player) {
 
 
 function keyPressed() {
+  let shpLng = player_1.ships[activeShip].length;
   if (placeShips) {
     if (keyCode === 98 || keyCode === 83) {
       console.log("DOWN")
-      if (tgt_y<9) {tgt_y++} else {return -1}
+      if ((tgt_r == 0 && tgt_y+shpLng<9) || tgt_y<9) {tgt_y++} else {return -1}
 
       loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
       loc_p1_grid[tgt_y-1][tgt_x].colour = loc_p1_grid[tgt_y-1][tgt_x].trueColour
@@ -284,7 +285,7 @@ function keyPressed() {
     }
     if (keyCode === 100 || keyCode === 65) {
       console.log("LEFT")
-      if (tgt_x>0) {tgt_x--} else {return -1}
+      if ((tgt_r == 1 && tgt_x-shpLng>0) ||tgt_x>0) {tgt_x--} else {return -1}
 
       loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
       loc_p1_grid[tgt_y][tgt_x+1].colour = loc_p1_grid[tgt_y][tgt_x+1].trueColour
@@ -292,7 +293,7 @@ function keyPressed() {
     }
     if (keyCode === 102 || keyCode === 68) {
       console.log("RIGHT")
-      if (tgt_x<9) {tgt_x++} else {return -1}
+      if ((tgt_r == 3 && tgt_x+shpLng<9) ||tgt_x<9) {tgt_x++} else {return -1}
 
       loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
       loc_p1_grid[tgt_y][tgt_x-1].colour = loc_p1_grid[tgt_y][tgt_x-1].trueColour
@@ -300,7 +301,7 @@ function keyPressed() {
     }
     if (keyCode === 104 || keyCode === 87) {
       console.log("UP")
-      if (tgt_y>0) {tgt_y--} else {return -1}
+      if ((tgt_r == 2 && tgt_y+shpLng>0) ||tgt_y>0) {tgt_y--} else {return -1}
 
       loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
       loc_p1_grid[tgt_y+1][tgt_x].colour = loc_p1_grid[tgt_y+1][tgt_x].trueColour
