@@ -20,6 +20,7 @@ const Y = CVS_HEIGHT / ROWS;
 // values for targeting / placing ships on coordinates
 let tgt_x = 0;
 let tgt_y = 0;
+let tgt_r = 0;
 
 let loc_p1_cvs;
 let loc_p2_cvs;
@@ -30,6 +31,8 @@ let loc_p2_cvs;
 let loc_p1_grid = [];
 let loc_p2_grid = [];
 
+let player_1;
+let player_2;
 
 
 // booleans
@@ -57,48 +60,6 @@ class Tile {
   }
 
   get trueColour() {return this.#trueColour}
-}
-
-
-
-class Compartment {
-  #coords;
-  bingus;
-
-  constructor(coords) {
-    this.#coords = coords
-    this.bingus = "bingus";
-  }
-}
-
-
-
-class Ship {
-  #type = ""
-  #seaworthy = true; // if ship is still alive
-  #length;
-  #name;
-  #coordinates;
-  #rotation;
-
-  constructor(length, type, name, coordinates, rotation) {
-    this.#type = type;
-    this.#length = new Array(length).fill(Compartment);
-    this.#name = name;
-    this.#coordinates = coordinates;
-    this.#rotation = rotation;
-  }
-
-
-  get name() {return this.#name}
-  get length() {return this.#length}
-  get coordinates() {return this.#coordinates}
-
-  set coordinates(item) {this.#coordinates = item}
-  set rotation(item) {this.#rotation = item}
-
-  get seaworthy() {return this.#seaworthy}
-  set seaworthy(item) {this.#seaworthy = item}
 }
 
 
@@ -145,6 +106,50 @@ class Player {
 
 
 
+class Ship {
+  #type = ""
+  #seaworthy = true; // if ship is still alive
+  #length;
+  #name;
+  #coordinates;
+  #rotation;
+
+  constructor(length, type, name, coordinates, rotation) {
+    this.#type = type;
+    this.#length = new Array(length).fill(Compartment);
+    this.#name = name;
+    this.#coordinates = coordinates;
+    this.#rotation = rotation;
+  }
+
+
+  get name() {return this.#name}
+  get length() {return this.#length}
+  get coordinates() {return this.#coordinates}
+
+  set coordinates(item) {this.#coordinates = item}
+  set rotation(item) {this.#rotation = item}
+
+  get seaworthy() {return this.#seaworthy}
+  set seaworthy(item) {this.#seaworthy = item}
+}
+
+
+
+class Compartment {
+  #coords;
+  bingus;
+
+  constructor(coords) {
+    this.#coords = coords
+    this.bingus = "bingus";
+  }
+}
+
+
+
+
+
 
 // functions
 
@@ -181,6 +186,13 @@ function grid_gen(grid) {
     }
   }
   return grid;
+}
+
+
+
+function changeTurn() {
+  turn *= -1;
+  // do some shtuff to hide the current screen, then ask for the other user's password, then reveal screen
 }
 
 
@@ -227,10 +239,11 @@ function draw_grid(x, y) {
 
 
 function initGame() {
-  let player_1 = new Player(1);
-  let player_2 = new Player(-1);
+  player_1 = new Player(1);
+  player_2 = new Player(-1);
 
-
+  player_1.username = "USN";
+  player_2.username = "IJN";
 
 
   shipPlacement(player_1);
@@ -238,11 +251,23 @@ function initGame() {
 }
 
 
-function drawShip(ship,x=2,y=3) {
-  console.log(ship);
+function drawShip(ship) {
+  // console.log(ship);
   // console.log(ship.length[0])
   for (let i = 0; i < ship.length.length; i++) {
     // loc_p1_grid[ship.length[i].coords[0]][ship.length[i].coords[1]].colour = "gray"
+  }
+}
+
+function placeShip(player) {
+  // activeShip defining which ship is being placed currently
+  console.log(player.username, player.ships[activeShip].name)
+  player.ships[activeShip].coordinates = [tgt_x, tgt_y];
+  activeShip++;
+
+  if (activeShip > 4) {
+    activeShip = 0;
+    if (turn == -1) {placeShips = false} else {changeTurn()}
   }
 }
 
@@ -285,23 +310,15 @@ function keyPressed() {
 
     if (keyCode === 82  || keyCode === 107) {
       console.log("ROTATE_SHIP")
+      if (tgt_r == 3) {tgt_r = 0} else {tgt_r++}
+      console.log(tgt_r)
+
     }
 
     if (keyCode === 32 || keyCode === 13) {
       console.log("CONFIRM")
-      if (activeShip < 5) {
-        player_1.ships.length[activeShip].coordinates = [tgt_x, tgt_y];
-        activeShip++;
-        console.log(player_1.ships.length[activeShip].coordinates = [tgt_x, tgt_y])
-      } else {
-        player_2.ships.length[activeShip-5].coordinates = [tgt_x, tgt_y];
-        activeShip++;
-        console.log(player_2.ships.length[activeShip-5].coordinates = [tgt_x, tgt_y])
-      }
-
-      if (activeShip >= 9) {
-        placeShips = false;
-      }
+      if (turn == 1) {placeShip(player_1)}
+      else {placeShip(player_2)}
     }
   }
 }
