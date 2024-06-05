@@ -17,26 +17,46 @@ const COLS = 10;
 const X = CVS_WIDTH / COLS;
 const Y = CVS_HEIGHT / ROWS;
 
+// values for targeting / placing ships on coordinates
+let tgt_x = 0;
+let tgt_y = 0;
+
 let loc_p1_cvs;
 let loc_p2_cvs;
 // let tgt_p1_cvs;
 // let tgt_p2_cvs;
+
 
 let loc_p1_grid = [];
 let loc_p2_grid = [];
 
 
 
+// booleans
+
+
+let turn = 1; // between 1 and -1
+let placeShips = true;
+let activeShip = 0;
+
+
+
+
+// classes
+
 
 class Tile {
   colour = [0, 0, 0];
+  #trueColour;
   value = 0;
 
   constructor(colour, value) {
     this.colour = colour;
+    this.#trueColour = colour
     this.value = value;
   }
 
+  get trueColour() {return this.#trueColour}
 }
 
 
@@ -125,6 +145,13 @@ class Player {
 
 
 
+
+// functions
+
+
+
+
+
 function setup() {
   loc_p1_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
   // loc_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
@@ -187,7 +214,7 @@ function draw_grid(x, y) {
   let x_buffer = (CVS_WIDTH - width*x)/2
   let y_buffer = (CVS_HEIGHT - height*y)/2
 
-  noStroke()
+  stroke([5,51,128]);
   for (let row = 0; row < y; row++) {
     for (let col = 0; col < x; col++) {
       // Fill the square with the r,g,b values from the model
@@ -205,6 +232,7 @@ function initGame() {
 
 
 
+
   shipPlacement(player_1);
   shipPlacement(player_2);
 }
@@ -212,8 +240,68 @@ function initGame() {
 
 function drawShip(ship,x=2,y=3) {
   console.log(ship);
-  console.log(ship.length[0])
+  // console.log(ship.length[0])
   for (let i = 0; i < ship.length.length; i++) {
     // loc_p1_grid[ship.length[i].coords[0]][ship.length[i].coords[1]].colour = "gray"
+  }
+}
+
+
+function keyPressed() {
+  if (placeShips) {
+    if (keyCode === 98 || keyCode === 83) {
+      console.log("DOWN")
+      if (tgt_y<9) {tgt_y++} else {return -1}
+
+      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      loc_p1_grid[tgt_y-1][tgt_x].colour = loc_p1_grid[tgt_y-1][tgt_x].trueColour
+
+    }
+    if (keyCode === 100 || keyCode === 65) {
+      console.log("LEFT")
+      if (tgt_x>0) {tgt_x--} else {return -1}
+
+      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      loc_p1_grid[tgt_y][tgt_x+1].colour = loc_p1_grid[tgt_y][tgt_x+1].trueColour
+
+    }
+    if (keyCode === 102 || keyCode === 68) {
+      console.log("RIGHT")
+      if (tgt_x<9) {tgt_x++} else {return -1}
+
+      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      loc_p1_grid[tgt_y][tgt_x-1].colour = loc_p1_grid[tgt_y][tgt_x-1].trueColour
+
+    }
+    if (keyCode === 104 || keyCode === 87) {
+      console.log("UP")
+      if (tgt_y>0) {tgt_y--} else {return -1}
+
+      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      loc_p1_grid[tgt_y+1][tgt_x].colour = loc_p1_grid[tgt_y+1][tgt_x].trueColour
+
+    }
+
+
+    if (keyCode === 82  || keyCode === 107) {
+      console.log("ROTATE_SHIP")
+    }
+
+    if (keyCode === 32 || keyCode === 13) {
+      console.log("CONFIRM")
+      if (activeShip < 5) {
+        player_1.ships.length[activeShip].coordinates = [tgt_x, tgt_y];
+        activeShip++;
+        console.log(player_1.ships.length[activeShip].coordinates = [tgt_x, tgt_y])
+      } else {
+        player_2.ships.length[activeShip-5].coordinates = [tgt_x, tgt_y];
+        activeShip++;
+        console.log(player_2.ships.length[activeShip-5].coordinates = [tgt_x, tgt_y])
+      }
+
+      if (activeShip >= 9) {
+        placeShips = false;
+      }
+    }
   }
 }
