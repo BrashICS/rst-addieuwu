@@ -28,6 +28,8 @@ let loc_p2_cvs;
 // let tgt_p2_cvs;
 
 
+let tempShip = [[0,0],[0,1],[0,2],[0,3],[0,4]];
+
 let loc_p1_grid = [];
 let loc_p2_grid = [];
 
@@ -82,7 +84,7 @@ class Player {
       // player 1 plays as USA
       this.#ships[0] = new Ship(5, "ac", "USS Yorktown")
       this.#ships[1] = new Ship(4, "bt", "USS Missouri")
-      this.#ships[2] = new Ship(3, "ds", "USS Cassin Young")
+      this.#ships[2] = new Ship(3, "ds", "USS Isherwood")
       this.#ships[3] = new Ship(3, "sb", "USS Barracuda")
       this.#ships[4] = new Ship(2, "pt", "USS Barfly")
     } else {
@@ -162,7 +164,7 @@ function setup() {
   // loc_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
   // tgt_p1_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
   // // tgt_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-
+  loc_p1_cvs.parent(loc_cvs_div); // i think this makes sense, i tried putting the canvas in a div so i can reposition it later
 
   // tgt_p1_grid.position(400,400);
   // Initialize the grid to all white squares
@@ -226,9 +228,12 @@ function draw_grid(x, y) {
   let x_buffer = (CVS_WIDTH - width*x)/2
   let y_buffer = (CVS_HEIGHT - height*y)/2
 
-  stroke([5,51,128]);
+
   for (let row = 0; row < y; row++) {
     for (let col = 0; col < x; col++) {
+      if (loc_p1_grid[row][col].colour == "gray") {
+        noStroke();
+      } else {stroke([5,51,128])}
       // Fill the square with the r,g,b values from the model
       fill(loc_p1_grid[row][col].colour);
       rect(col*width + x_buffer, row*height + y_buffer, width, height);
@@ -246,16 +251,17 @@ function initGame() {
   player_2.username = "IJN";
 
 
-  shipPlacement(player_1);
-  shipPlacement(player_2);
+  drawShip(tempShip);
+
+  // shipPlacement(player_1);
+  // shipPlacement(player_2);
 }
 
 
 function drawShip(ship) {
   // console.log(ship);
-  // console.log(ship.length[0])
-  for (let i = 0; i < ship.length.length; i++) {
-    // loc_p1_grid[ship.length[i].coords[0]][ship.length[i].coords[1]].colour = "gray"
+  for (let i = 0; i < ship.length; i++) {
+    loc_p1_grid[ship[i][0]][ship[i][1]].colour = "gray";
   }
 }
 
@@ -273,38 +279,67 @@ function placeShip(player) {
 
 
 function keyPressed() {
-  let shpLng = player_1.ships[activeShip].length;
+  // let shpLng = player_1.ships[activeShip].length.length;
+  let shpLng = tempShip.length;
+  // console.log(player_1.ships[activeShip].length)
   if (placeShips) {
     if (keyCode === 98 || keyCode === 83) {
-      console.log("DOWN")
-      if ((tgt_r == 0 && tgt_y+shpLng<9) || tgt_y<9) {tgt_y++} else {return -1}
+      // console.log("DOWN")
+      if ((tgt_r == 0 && tgt_y+shpLng<9) || tgt_y<9) {
+        tgt_y++
+        for (let i = 0; i < shpLng; i++) {
+          tempShip[i][0]++
+          loc_p1_grid[tgt_y][tempShip[i][1]].colour = ["gray"]
+          loc_p1_grid[tgt_y-1][tempShip[i][1]].colour = loc_p1_grid[tgt_y-1][tempShip[i][1]].trueColour
+        }
+      } else {return -1}
 
-      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      loc_p1_grid[tgt_y-1][tgt_x].colour = loc_p1_grid[tgt_y-1][tgt_x].trueColour
-
+      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_p1_grid[tgt_y-1][tgt_x].colour = loc_p1_grid[tgt_y-1][tgt_x].trueColour
     }
     if (keyCode === 100 || keyCode === 65) {
-      console.log("LEFT")
-      if ((tgt_r == 1 && tgt_x-shpLng>0) ||tgt_x>0) {tgt_x--} else {return -1}
+      // console.log("LEFT")
+      if ((tgt_r == 1 && tgt_x-shpLng>0) ||tgt_x>0) {
+        tgt_x--
+        for (let i = 0; i < shpLng; i++) {
+          tempShip[i][0]--
+          loc_p1_grid[tempShip[i][0]][tgt_x].colour = ["gray"]
+          loc_p1_grid[tempShip[i][0]][tgt_x+1].colour = loc_p1_grid[tempShip[i][0]][tgt_x+1].trueColour
+        }
+      } else {return -1}
 
-      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      loc_p1_grid[tgt_y][tgt_x+1].colour = loc_p1_grid[tgt_y][tgt_x+1].trueColour
+      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_p1_grid[tgt_y][tgt_x+1].colour = loc_p1_grid[tgt_y][tgt_x+1].trueColour
 
     }
     if (keyCode === 102 || keyCode === 68) {
-      console.log("RIGHT")
-      if ((tgt_r == 3 && tgt_x+shpLng<9) ||tgt_x<9) {tgt_x++} else {return -1}
+      // console.log("RIGHT")
+      if ((tgt_r == 3 && tgt_x+shpLng<9) ||tgt_x<9) {
+        tgt_x++
+        for (let i = 0; i < shpLng; i++) {
+          tempShip[i][0]++
+          loc_p1_grid[tempShip[i][1]][tgt_x].colour = ["gray"]
+          loc_p1_grid[tempShip[i][1]][tgt_x-1].colour = loc_p1_grid[tempShip[i][1]][tgt_x-1].trueColour
+        }
+      } else {return -1}
 
-      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      loc_p1_grid[tgt_y][tgt_x-1].colour = loc_p1_grid[tgt_y][tgt_x-1].trueColour
+      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_p1_grid[tgt_y][tgt_x-1].colour = loc_p1_grid[tgt_y][tgt_x-1].trueColour
 
     }
     if (keyCode === 104 || keyCode === 87) {
-      console.log("UP")
-      if ((tgt_r == 2 && tgt_y+shpLng>0) ||tgt_y>0) {tgt_y--} else {return -1}
+      // console.log("UP")
+      if ((tgt_r == 2 && tgt_y-shpLng>0) ||tgt_y>0) {
+        tgt_y--
+        for (let i = 0; i < shpLng; i++) {
+          tempShip[i][0]--
+          loc_p1_grid[tgt_y][tempShip[i][1]].colour = ["gray"]
+          loc_p1_grid[tgt_y+1][tempShip[i][1]].colour = loc_p1_grid[tgt_y+1][tempShip[i][1]].trueColour
+        }
+      } else {return -1}
 
-      loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      loc_p1_grid[tgt_y+1][tgt_x].colour = loc_p1_grid[tgt_y+1][tgt_x].trueColour
+      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_p1_grid[tgt_y+1][tgt_x].colour = loc_p1_grid[tgt_y+1][tgt_x].trueColour
 
     }
 
@@ -323,3 +358,11 @@ function keyPressed() {
     }
   }
 }
+
+
+
+
+
+function log(str) {
+  document.getElementById("debug").innerHTML += "<br>" + str.toString();
+} // not working, don't know why, not gonna fix
