@@ -169,10 +169,11 @@ class Compartment {
 
 function setup() {
   loc_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-  tgt_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
+  // tgt_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
 
-  loc_cvs.parent("loc_cvs_div");
-  tgt_cvs.parent("tgt_cvs_div");
+  // loc_cvs.parent("loc_cvs_div");
+  // tgt_cvs.parent("tgt_cvs_div");
+  loc_cvs.position(10,10, "fixed");
 
   // tgt_p1_grid.position(400,400);
   // Initialize the grid to all white squares
@@ -481,9 +482,20 @@ function keyPressed() {
 
     if (keyCode === 32 || keyCode === 13) {
       console.log("CONFIRM")
+
+      for (let i = 0; i < shpLng; i++) {
+        if (loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+          console.log("COLLISION DETECTED");
+          return -1;
+        } // error checking, prevents two ships from occupying the same coordinate
+      }
+
+      console.log("SHIP PLACED")
+
       tgt_r = 0;
       tgt_x = 0;
       tgt_y = 0;
+
       if (turn == 1) {
         placeShip(player_1, player.ships[a_s].loc);
         drawShip(player_1.ships[a_s+1].loc)
@@ -506,7 +518,7 @@ function canRotate(coords) {
       return false;
     }
   }
-}
+} // checks if the coordinates the ship is being rotated to are within the battlefield's borders
 
 
 
@@ -517,7 +529,7 @@ function flashy(coords) {
     loc_grid[coords[f][0]][coords[f][1]].colour = loc_grid[coords[f][0]][coords[f][1]].trueColour;
 
   }
-} // meant to be used to flash location when the ship can't go there
+} // meant to be used to flash location when the ship can't go there, but i'm not gonna code that rn
 
 
 
