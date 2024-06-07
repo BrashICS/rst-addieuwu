@@ -22,8 +22,8 @@ let tgt_x = 0;
 let tgt_y = 0;
 let tgt_r = 0;
 
-let loc_p1_cvs;
-let loc_p2_cvs;
+let loc_cvs;
+let tgt_cvs;
 // let tgt_p1_cvs;
 // let tgt_p2_cvs;
 
@@ -168,11 +168,11 @@ class Compartment {
 
 
 function setup() {
-  loc_p1_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-  // loc_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-  // tgt_p1_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-  // // tgt_p2_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-  loc_p1_cvs.parent(loc_cvs_div); // i think this makes sense, i tried putting the canvas in a div so i can reposition it later
+  loc_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
+  tgt_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
+
+  loc_cvs.parent("loc_cvs_div");
+  tgt_cvs.parent("tgt_cvs_div");
 
   // tgt_p1_grid.position(400,400);
   // Initialize the grid to all white squares
@@ -372,7 +372,8 @@ function keyPressed() {
             loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
           } else {
             loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-          }        } // draws new boat after clearing old boat
+          }
+        } // draws new boat after clearing old boat
       } else {return -1}
 
       // loc_grid[tgt_y][tgt_x].colour = [151,95,150]
@@ -469,9 +470,11 @@ function keyPressed() {
       }
 
       for (let i = 0; i < shpLng; i++) {
-        // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
-        // console.log(loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]])
-        loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+        if (loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+          loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+        } else {
+          loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+        }
       }
 
     } // rotate  // R, NUMPAD_PLUS
@@ -481,8 +484,14 @@ function keyPressed() {
       tgt_r = 0;
       tgt_x = 0;
       tgt_y = 0;
-      if (turn == 1) {placeShip(player_1, player.ships[a_s].loc)}
-      else {placeShip(player_2, player.ships[a_s].loc)}
+      if (turn == 1) {
+        placeShip(player_1, player.ships[a_s].loc);
+        drawShip(player_1.ships[a_s+1].loc)
+      }
+      else {
+        placeShip(player_2, player.ships[a_s].loc)
+        drawShip(player_2.ships[a_s+1].loc)
+      }
     } // confirm // SPACE, ENTER, NUMPAD_ENTER
   }
 
