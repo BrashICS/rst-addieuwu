@@ -277,11 +277,17 @@ function placeShip(player) {
 
 
 function keyPressed() {
-  // let shpLng = player_1.ships[activeShip].length.length;
-  let shpLng = tempShip.length;
-
   // console.log(player_1.ships[activeShip].length)
+  let player;
+  if (turn == 1) {player = player_1} else {player = player_2}
+  console.log(player.ships[activeShip].length[0].coords);
+  // i'm very confident that this is actually very bad practice and probably brings a lot of issues with it
+  // but i don't know how else to pass player_1 or player_2 to this function when it's their turn and this seems to work
+  // so i'll stick with it and i'll fight you over it
+
   if (placeShips) {
+    let shpLng = tempShip.length;
+
     if (keyCode === 98 || keyCode === 83) {
       // console.log("DOWN")
       if ((tgt_r == 1 && tgt_y+shpLng<10) || (tgt_r != 1 && tgt_y<9)) {
@@ -355,7 +361,7 @@ function keyPressed() {
 
     } // down   // S, NUMPAD_2
 
-    
+
     if (keyCode === 82  || keyCode === 107) {
       console.log("ROTATE_SHIP");
       console.log(tgt_r);
