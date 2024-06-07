@@ -53,7 +53,8 @@ let a_s = 0; // short for activeShip. changed to a_s because activeShip was a bu
 class Tile {
   colour = [0, 0, 0];
   #trueColour;
-  value = 0;
+  #hasShip = false;
+  #beenHit = false;
 
   constructor(colour, value) {
     this.colour = colour;
@@ -62,6 +63,11 @@ class Tile {
   }
 
   get trueColour() {return this.#trueColour}
+  get hasShip() {return this.#hasShip};
+  get beenHit() {return this.#beenHit};
+
+  set hasShip(item) {this.#hasShip = item; this.#trueColour = "gray"};
+  set beenHit(item) {this.#beenHit = item};
 }
 
 
@@ -260,9 +266,12 @@ function drawShip(ship) {
   }
 }
 
-function placeShip(player) {
+function placeShip(player, ship) {
   // a_s defining which ship is being placed currently
   a_s++;
+  for (let i = 0; i < ship.length; i++) {
+    loc_grid[ship[i][0]][ship[i][1]].hasShip = true;
+  }
 
   if (a_s > 4) {
     a_s = 0;
@@ -293,7 +302,12 @@ function keyPressed() {
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           player.ships[a_s].loc[i][0]++;
-          loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+          if (loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+          } else {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+          }
+
         } // draws new boat after clearing old boat
       } else {return -1}
 
@@ -310,7 +324,11 @@ function keyPressed() {
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           player.ships[a_s].loc[i][1]--;
-          loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+          if (loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+          } else {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+          }
         } // draws new boat after clearing old boat
       } else {return -1}
 
@@ -328,8 +346,11 @@ function keyPressed() {
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           player.ships[a_s].loc[i][1]++;
-          loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-        } // draws new boat after clearing old boat
+          if (loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+          } else {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+          }        } // draws new boat after clearing old boat
 
       } else {return -1}
 
@@ -347,8 +368,11 @@ function keyPressed() {
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           player.ships[a_s].loc[i][0]--;
-          loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-        } // draws new boat after clearing old boat
+          if (loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+          } else {
+            loc_grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+          }        } // draws new boat after clearing old boat
       } else {return -1}
 
       // loc_grid[tgt_y][tgt_x].colour = [151,95,150]
@@ -457,8 +481,8 @@ function keyPressed() {
       tgt_r = 0;
       tgt_x = 0;
       tgt_y = 0;
-      if (turn == 1) {placeShip(player_1)}
-      else {placeShip(player_2)}
+      if (turn == 1) {placeShip(player_1, player.ships[a_s].loc)}
+      else {placeShip(player_2, player.ships[a_s].loc)}
     } // confirm // SPACE, ENTER, NUMPAD_ENTER
   }
 
