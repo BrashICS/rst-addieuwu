@@ -9,8 +9,8 @@
 'use strict';
 
 
-const CVS_WIDTH = 600;
-const CVS_HEIGHT = 600;
+const CVS_WIDTH = 300;
+const CVS_HEIGHT = 300;
 const ROWS = 10;
 const COLS = 10;
 
@@ -28,7 +28,7 @@ let loc_p2_cvs;
 // let tgt_p2_cvs;
 
 
-let tempShip = [[0,0],[0,1],[0,2],[0,3],[0,4]];
+let tempShip = [[0,0],[0,1],[0,2]];
 
 let loc_grid = [];
 let loc_p2_grid = [];
@@ -42,7 +42,7 @@ let player_2;
 
 let turn = 1; // between 1 and -1
 let placeShips = true;
-let activeShip = 0;
+let a_s = 0; // short for activeShip. changed to a_s because activeShip was a bunch of characters and made the code harder for me to read.
 
 
 
@@ -111,22 +111,24 @@ class Player {
 class Ship {
   #type = ""
   #seaworthy = true; // if ship is still alive
-  #length;
+  #length = [];
   #name;
   // #coordinates;
   #rotation;
 
   constructor(length, type, name, rotation) {
     this.#type = type;
-    this.#length = new Array(length).fill(Compartment);
     this.#name = name;
+    for (let a = 0; a < length; a++) {
+      this.#length.push([0,a,false])
+    }
     // this.#coordinates = coordinates;
     this.#rotation = rotation;
   }
 
 
   get name() {return this.#name}
-  get length() {return this.#length}
+  get loc() {return this.#length} // loc short for location
   // get coordinates() {return this.#coordinates}
 
   // set coordinates(item) {this.#coordinates = item}
@@ -199,14 +201,7 @@ function changeTurn() {
 
 
 
-function shipPlacement(player) {
 
-  // place ships in descending length
-  // ac, bt, ds, sb, pt
-
-  drawShip(player.ships[1])
-
-}
 
 
 
@@ -251,7 +246,7 @@ function initGame() {
   player_2.username = "IJN";
 
 
-  drawShip(tempShip);
+  drawShip(player_1.ships[a_s].loc);
 
   // shipPlacement(player_1);
   // shipPlacement(player_2);
@@ -266,21 +261,21 @@ function drawShip(ship) {
 }
 
 function placeShip(player) {
-  // activeShip defining which ship is being placed currently
-  activeShip++;
+  // a_s defining which ship is being placed currently
+  a_s++;
 
-  if (activeShip > 4) {
-    activeShip = 0;
+  if (a_s > 4) {
+    a_s = 0;
     if (turn == -1) {placeShips = false} else {changeTurn()}
   }
 }
 
 
 function keyPressed() {
-  // console.log(player_1.ships[activeShip].length)
+  // console.log(player_1.ships[a_s].length)
   let player;
   if (turn == 1) {player = player_1} else {player = player_2}
-  console.log(player.ships[activeShip].length[0].coords);
+  console.log(player.ships[a_s].length[0].coords);
   // i'm very confident that this is actually very bad practice and probably brings a lot of issues with it
   // but i don't know how else to pass player_1 or player_2 to this function when it's their turn and this seems to work
   // so i'll stick with it and i'll fight you over it
