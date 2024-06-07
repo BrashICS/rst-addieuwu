@@ -30,7 +30,7 @@ let loc_p2_cvs;
 
 let tempShip = [[0,0],[0,1],[0,2],[0,3],[0,4]];
 
-let loc_p1_grid = [];
+let loc_grid = [];
 let loc_p2_grid = [];
 
 let player_1;
@@ -168,7 +168,7 @@ function setup() {
 
   // tgt_p1_grid.position(400,400);
   // Initialize the grid to all white squares
-  grid_gen(loc_p1_grid)
+  grid_gen(loc_grid)
   // grid_gen(tgt_p1_grid)
 
 
@@ -231,11 +231,11 @@ function draw_grid(x, y) {
 
   for (let row = 0; row < y; row++) {
     for (let col = 0; col < x; col++) {
-      if (loc_p1_grid[row][col].colour == "gray") {
+      if (loc_grid[row][col].colour == "gray") {
         noStroke();
       } else {stroke([5,51,128])}
       // Fill the square with the r,g,b values from the model
-      fill(loc_p1_grid[row][col].colour);
+      fill(loc_grid[row][col].colour);
       rect(col*width + x_buffer, row*height + y_buffer, width, height);
     }
   }
@@ -261,7 +261,7 @@ function initGame() {
 function drawShip(ship) {
   // console.log(ship);
   for (let i = 0; i < ship.length; i++) {
-    loc_p1_grid[ship[i][0]][ship[i][1]].colour = "gray";
+    loc_grid[ship[i][0]][ship[i][1]].colour = "gray";
   }
 }
 
@@ -288,93 +288,199 @@ function keyPressed() {
         tgt_y++
 
         for (let i = 0; i < shpLng; i++) {
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_p1_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           tempShip[i][0]++;
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
         } // draws new boat after clearing old boat
       } else {return -1}
 
-      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      // loc_p1_grid[tgt_y-1][tgt_x].colour = loc_p1_grid[tgt_y-1][tgt_x].trueColour
-    }
+      // loc_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_grid[tgt_y-1][tgt_x].colour = loc_grid[tgt_y-1][tgt_x].trueColour
+    } // up     // W, NUMPAD_8
     if (keyCode === 100 || keyCode === 65) {
       // console.log("LEFT")
       if ((tgt_r == 2 && tgt_x-shpLng>0) ||(tgt_r != 2 && tgt_x>0)) {
         tgt_x--
 
         for (let i = 0; i < shpLng; i++) {
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_p1_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           tempShip[i][1]--;
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
         } // draws new boat after clearing old boat
       } else {return -1}
 
-      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      // loc_p1_grid[tgt_y][tgt_x+1].colour = loc_p1_grid[tgt_y][tgt_x+1].trueColour
+      // loc_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_grid[tgt_y][tgt_x+1].colour = loc_grid[tgt_y][tgt_x+1].trueColour
 
-    }
+    } // left   // A, NUMPAD_4
     if (keyCode === 102 || keyCode === 68) {
       // console.log("RIGHT")
       if ((tgt_r == 0 && tgt_x+shpLng<10) || (tgt_r != 0 && tgt_x<9)) {
         tgt_x++
 
         for (let i = 0; i < shpLng; i++) {
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_p1_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           tempShip[i][1]++;
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
         } // draws new boat after clearing old boat
 
       } else {return -1}
 
-      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      // loc_p1_grid[tgt_y][tgt_x-1].colour = loc_p1_grid[tgt_y][tgt_x-1].trueColour
+      // loc_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_grid[tgt_y][tgt_x-1].colour = loc_grid[tgt_y][tgt_x-1].trueColour
 
-    }
+    } // right  // D, NUMPAD_6
     if (keyCode === 104 || keyCode === 87) {
       // console.log("UP")
       if ((tgt_r == 3 && tgt_y-shpLng>0) ||(tgt_r != 3 && tgt_y>0)) {
         tgt_y-- // not sure i actually need this but i kinda like it so i'm keeping it
 
         for (let i = 0; i < shpLng; i++) {
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_p1_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
         } // clears old boat before drawing new boat
         for (let i = 0; i < shpLng; i++) {
           tempShip[i][0]--;
-          loc_p1_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
         } // draws new boat after clearing old boat
       } else {return -1}
 
-      // loc_p1_grid[tgt_y][tgt_x].colour = [151,95,150]
-      // loc_p1_grid[tgt_y+1][tgt_x].colour = loc_p1_grid[tgt_y+1][tgt_x].trueColour
+      // loc_grid[tgt_y][tgt_x].colour = [151,95,150]
+      // loc_grid[tgt_y+1][tgt_x].colour = loc_grid[tgt_y+1][tgt_x].trueColour
 
-    }
+    } // down   // S, NUMPAD_2
 
-
+    
     if (keyCode === 82  || keyCode === 107) {
-      console.log("ROTATE_SHIP")
-      if (tgt_r == 3) {tgt_r = 0} else {tgt_r++}
-      console.log(tgt_r)
+      console.log("ROTATE_SHIP");
+      console.log(tgt_r);
+      let saveCoords = structuredClone(tempShip);
 
-    }
+      if (tgt_r == 3) {tgt_r = 0} else {tgt_r++}
+
+      // rotating the ship's coordinates
+      // there's probably a way i can do this in like four lines but i'm running short on time so i gotta zoom
+      if (tgt_r == 1) {
+        for (let i = 0; i < shpLng; i++) {
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          tempShip[i][0] = tempShip[i][0]+i
+          tempShip[i][1] = tempShip[i][1]-i
+          // console.log(tempShip[i][0], tempShip[i][1])
+
+        }
+
+        if (canRotate(tempShip) == false) {
+          tgt_r--;
+          for (let k = 0; k < shpLng; k++) {
+            tempShip[k][0] = tempShip[k][0]-k
+            tempShip[k][1] = tempShip[k][1]+k
+            loc_grid[tempShip[k][0]][tempShip[k][1]].colour = "gray";
+          }
+        }
+
+
+      } else if (tgt_r == 2) {
+        for (let i = 0; i < shpLng; i++) {
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          tempShip[i][0] = tempShip[i][0]-i
+          tempShip[i][1] = tempShip[i][1]-i
+          // console.log(tempShip[i][0], tempShip[i][1])
+
+        }
+
+        if (canRotate(tempShip) == false) {
+          tgt_r--;
+          for (let k = 0; k < shpLng; k++) {
+            tempShip[k][0] = tempShip[k][0]+k
+            tempShip[k][1] = tempShip[k][1]+k
+            loc_grid[tempShip[k][0]][tempShip[k][1]].colour = "gray";
+          }
+        }
+
+
+      } else if (tgt_r == 3) {
+        for (let i = 0; i < shpLng; i++) {
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          tempShip[i][0] = tempShip[i][0]-i
+          tempShip[i][1] = tempShip[i][1]+i
+          // console.log(tempShip[i][0], tempShip[i][1])
+
+        }
+
+        if (canRotate(tempShip) == false) {
+          tgt_r--;
+          for (let k = 0; k < shpLng; k++) {
+            tempShip[k][0] = tempShip[k][0]+k
+            tempShip[k][1] = tempShip[k][1]-k
+            loc_grid[tempShip[k][0]][tempShip[k][1]].colour = "gray";
+          }
+        }
+
+
+      } else if (tgt_r == 0){
+        for (let i = 0; i < shpLng; i++) {
+          loc_grid[tempShip[i][0]][tempShip[i][1]].colour = loc_grid[tempShip[i][0]][tempShip[i][1]].trueColour;
+          tempShip[i][0] = tempShip[i][0]+i
+          tempShip[i][1] = tempShip[i][1]+i
+          // console.log(tempShip[i][0], tempShip[i][1])
+
+        }
+
+        if (canRotate(tempShip) == false) {
+          tgt_r--;
+          for (let k = 0; k < shpLng; k++) {
+            tempShip[k][0] = tempShip[k][0]-k
+            tempShip[k][1] = tempShip[k][1]-k
+            loc_grid[tempShip[k][0]][tempShip[k][1]].colour = "gray";
+          }
+        }
+
+
+      }
+
+      for (let i = 0; i < shpLng; i++) {
+        // console.log(tempShip[i][0], tempShip[i][1])
+        // console.log(loc_grid[tempShip[i][0]][tempShip[i][1]])
+        loc_grid[tempShip[i][0]][tempShip[i][1]].colour = ["gray"];
+      }
+
+    } // rotate  // R, NUMPAD_PLUS
 
     if (keyCode === 32 || keyCode === 13) {
       console.log("CONFIRM")
       if (turn == 1) {placeShip(player_1)}
       else {placeShip(player_2)}
-    }
+    } // confirm // SPACE, NUMPAD_ENTER
   }
 
-  console.log(tgt_x + shpLng, tgt_r)
 
 }
 
 
+function canRotate(coords) {
+  for (let j = 0; j < coords.length; j++) {
+    // console.log(coords[j])
+    if (coords[j][0] < 0 || coords[j][1] < 0 || coords[j][0] > 9 || coords[j][1] > 9) {
+      return false;
+    }
+  }
+}
+
+
+
+function flashy(coords) {
+  for (let f = 0; f < coords.length; f++) {
+    loc_grid[coords[f][0]][coords[f][1]].colour = "red";
+    // something to make it wait
+    loc_grid[coords[f][0]][coords[f][1]].colour = loc_grid[coords[f][0]][coords[f][1]].trueColour;
+
+  }
+} // meant to be used to flash location when the ship can't go there
 
 
 
