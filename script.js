@@ -27,6 +27,7 @@ let tgt_cvs;
 // let tgt_p1_cvs;
 // let tgt_p2_cvs;
 
+let frames = 0; // used to count seconds, increases by 1 every time draw() runs and resets when it gets to 60
 
 let tempShip = [[0,0],[0,1],[0,2]];
 
@@ -212,7 +213,8 @@ function setup() {
 
 function draw() {
 
-
+  // frames++;
+  // if (frames > 20) {frames = 1; console.log(": seconds")}
   if (turn == 1) {
     draw_grid(loc_p1_grid, COLS, ROWS);
   } else if (turn == -1) {
@@ -230,6 +232,13 @@ function draw_grid(grid, x, y) {
   let x_buffer = (CVS_WIDTH - width*x)/2
   let y_buffer = (CVS_HEIGHT - height*y)/2
 
+  let tileX = CVS_WIDTH / COLS;
+  let tileY = CVS_HEIGHT / ROWS;
+  let activeX = (mouseX - (mouseX % tileX)) / tileX;
+  let activeY = (mouseY - (mouseY % tileY)) / tileY;
+
+  grid[prevActive[0]][prevActive[1]].resetColour();
+  cursor(ARROW);
 
   for (let row = 0; row < y; row++) {
     for (let col = 0; col < x; col++) {
@@ -240,22 +249,20 @@ function draw_grid(grid, x, y) {
         noStroke();
         grid[row][col].colour = "white"
       }
+       if (activeX < COLS && activeY < ROWS && activeY > 10) {
+      // grid[activeY][activeX]
+      // stroke("green")
+      prevActive = [activeY, activeX];
+      cursor(CROSS)
+    }
       // Fill the square with the r,g,b values from the model
       fill(grid[row][col].colour);
       rect(col*width + x_buffer, row*height + y_buffer, width, height);
     }
-    let tileX = CVS_WIDTH / COLS;
-    let tileY = CVS_HEIGHT / ROWS;
-    let activeX = (mouseX - (mouseX % tileX)) / tileX;
-    let activeY = (mouseY - (mouseY % tileY)) / tileY;
 
-    grid[prevActive[0]][prevActive[1]].resetColour();
-    cursor(ARROW)
-    if (activeX < COLS && activeY < ROWS && activeY > 10) {
-      grid[activeY][activeX].colour = [151,95,150];
-      prevActive = [activeY, activeX];
-      cursor(CROSS)
-    }
+
+
+
   }
 
 
@@ -355,6 +362,8 @@ function canRotate(coords) {
   for (let j = 0; j < coords.length; j++) {
     // console.log(coords[j])
     if (coords[j][0] < 0 || coords[j][1] < 0 || coords[j][0] > 9 || coords[j][1] > 9) {
+      // let timer = 0;
+      // let flashyInterval = setInterval(flashy(), 100);
       return false;
     }
   }
@@ -363,13 +372,18 @@ function canRotate(coords) {
 
 
 function flashy(coords, grid) {
-  for (let f = 0; f < coords.length; f++) {
-    grid[coords[f][0]][coords[f][1]].colour = "red";
-    // something to make it wait
-    grid[coords[f][0]][coords[f][1]].colour = grid[coords[f][0]][coords[f][1]].trueColour;
-
+  if (timer % 2 == 1) {
+    for (let f = 0; f < coords.length; f++) {
+      grid[coords[f][0]][coords[f][1]].colour = "red";
+    }
+  } else {
+    for (let f = 0; f < coords.length; f++) {
+      grid[coords[f][0]][coords[f][1]].resetColour();
+    }
   }
-} // meant to be used to flash location when the ship can't go there, but i'm not gonna code that rn
+  timer++;
+  if (timer > 6) {clearInterval(flashyInterval())}
+} // meant to be used to flash location when the ship can't go there, doesn't work at the moment
 
 
 
@@ -391,18 +405,27 @@ function moveShip(grid, player, shpLng, c,p) {
 
 
 function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
-  if (y > 11) {return -1} // checking if the mouse was clicked on the targeting grid
-  console.log(loc_p1_grid[y][x], y, x)
+  if (y <= 10) {return -1} // checking if the mouse was clicked on the targeting grid
+  // console.log(grid_p1[y][x], y, x)
+  // console.log(grid_p1[y][x])
   console.log("SHELL FIRED");
   grid_p1[y][x].beenHit = true;
-  grid_p2[y][x].beenHit = true;
+  grid_p2[y-11][x].beenHit = true;
   p1.shots_fired++;
+  // console.log(loc_p1_grid[y][x], y, x)
+  grid_p1[y][x].resetColour();
 
   if (grid_p1[y][x].hasShip == true) {
     console.log("HIT");
+    // grid_p1[y][x].colour = "red";
   } else {
     console.log("MISS");
+    // grid_p1[y][x].colour = "white";
   }
+
+  // wait for a few seconds before switching turn
+  changeTurn();
+
 }
 
 ///////////////////////////////////////////   Event Functions   ///////////////////////////////////////////
@@ -632,11 +655,11 @@ function mouseClicked() {
 
 
   if (turn == 1) {
-    fireAtCoords(loc_p1_grid, loc_p2_grid, player_1, player_2, activeX, activeY);
-    console.log("shoot:", activeY, activeX);
+    fireAtCoords(loc_p1_grid, loc_p2_grid, player_1, player_2, activeY, activeX);
+    // console.log("shoot:", activeY, activeX);
   } else if (turn == -1) {
-    fireAtCoords(loc_p2_grid, loc_p1_grid, player_2, player_1, activeX, activeY);
-    console.log("shoot:", activeY, activeX);
+    fireAtCoords(loc_p2_grid, loc_p1_grid, player_2, player_1, activeY, activeX);
+    // console.log("shoot:", activeY, activeX);
 
 
   }
