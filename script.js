@@ -10,8 +10,8 @@
 
 
 const CVS_WIDTH = 300;
-const CVS_HEIGHT = 300;
-const ROWS = 10;
+const CVS_HEIGHT = 630;
+const ROWS = 21;
 const COLS = 10;
 
 const X = CVS_WIDTH / COLS;
@@ -39,6 +39,7 @@ let player_2;
 
 // booleans
 
+let tempTurn = 1;
 
 let turn = 1; // between 1 and -1
 let placeShips = true;
@@ -119,10 +120,10 @@ class Player {
 
 
 class Ship {
-  #type = ""
+  #type = "" // type of ship, used for text alert when the ship has been destroyed
   #seaworthy = true; // if ship is still alive
-  #length = [];
-  #name;
+  #length = []; // length of ship
+  #name; // name of ship, used for text alert when the ship has been destroyed
   // #coordinates;
   #rotation;
 
@@ -151,13 +152,16 @@ class Ship {
 
 
 class Compartment {
-  #coords;
-  bingus;
+  #coords; // coordinates of compartment on grid
+  bingus = "bingus" // bingus
+  #damaged = false; // boolean if the compartment has recieved a hit
 
   constructor(coords) {
     this.#coords = coords
-    this.bingus = "bingus"; // bingus
   }
+
+  get damaged() {return this.#damaged}
+  set damaged(item) {this.#damaged = item}
 }
 
 
@@ -194,11 +198,15 @@ function grid_gen(grid) {
   for (let y = 0; y < ROWS; y++) {
     grid[y] = [];
     for (let x = 0; x < COLS; x++) {
+
       if ((x+y) % 2 == 0) {
+        // grid[y].push(new Tile([0, 60, 120], 0));
         grid[y].push(new Tile([0, 120, 230], 0));
       } else {
-        grid[y].push(new Tile([0,130,230], 0));
+        // grid[y].push(new Tile([0,65,120], 0));
+        grid[y].push(new Tile([0, 130, 230], 0));
       }
+
     }
   }
   return grid;
@@ -214,6 +222,7 @@ function changeTurn() {
   } else {
     draw_grid(loc_p2_grid);
   }
+  console.log("turn changed: "+turn);
 }
 
 
@@ -251,6 +260,10 @@ function draw_grid(grid, x, y) {
       if (grid[row][col].colour == "gray") {
         noStroke();
       } else {stroke([5,51,128])}
+      if (row == 10) {
+        noStroke();
+        grid[row][col].colour = "white"
+      }
       // Fill the square with the r,g,b values from the model
       fill(grid[row][col].colour);
       rect(col*width + x_buffer, row*height + y_buffer, width, height);
@@ -268,25 +281,26 @@ function initGame() {
   player_2.username = "IJN";
 
 
-  drawShip(player_1.ships[a_s].loc);
+  // drawShip(player_1.ships[a_s].loc);
 
   // shipPlacement(player_1);w
   // shipPlacement(player_2);
 }
 
 
-function drawShip(ship) {
+function drawShip(grid, ship) {
   // console.log(ship);
   for (let i = 0; i < ship.length; i++) {
-    loc_p1_grid[ship[i][0]][ship[i][1]].colour = "gray";
+    grid[ship[i][0]][ship[i][1]].colour = "gray";
   }
 }
 
-function placeShip(grid, ship) {
+function placeShip(gridP1, gridP2, ship) {
   // a_s defining which ship is being placed currently
   a_s++;
   for (let i = 0; i < ship.length; i++) {
-    grid[ship[i][0]][ship[i][1]].hasShip = true;
+    gridP1[ship[i][0]][ship[i][1]].hasShip = true;
+    gridP2[ship[i][0]+10][ship[i][1]].hasShip = true;
   }
 
   if (a_s > 4) {
@@ -316,7 +330,7 @@ function keyPressed() {
   if (placeShips) {
     let shpLng = player.ships[a_s].loc.length;
 
-    if (keyCode === 98 || keyCode === 83) {
+    if (keyCode ===  98 || keyCode === 83 || keyCode === 40) {
       // console.log("DOWN")
       if ((tgt_r == 1 && tgt_y+shpLng<10) || (tgt_r != 1 && tgt_y<9)) {
         tgt_y++
@@ -338,7 +352,7 @@ function keyPressed() {
       // grid[tgt_y][tgt_x].colour = [151,95,150]
       // grid[tgt_y-1][tgt_x].colour = grid[tgt_y-1][tgt_x].trueColour
     } // up     // W, NUMPAD_8
-    if (keyCode === 100 || keyCode === 65) {
+    if (keyCode === 100 || keyCode === 65 || keyCode === 37) {
       // console.log("LEFT")
       if ((tgt_r == 2 && tgt_x-shpLng>0) ||(tgt_r != 2 && tgt_x>0)) {
         tgt_x--
@@ -360,7 +374,7 @@ function keyPressed() {
       // grid[tgt_y][tgt_x+1].colour = grid[tgt_y][tgt_x+1].trueColour
 
     } // left   // A, NUMPAD_4
-    if (keyCode === 102 || keyCode === 68) {
+    if (keyCode === 102 || keyCode === 68 || keyCode === 39) {
       // console.log("RIGHT")
       if ((tgt_r == 0 && tgt_x+shpLng<10) || (tgt_r != 0 && tgt_x<9)) {
         tgt_x++
@@ -382,7 +396,7 @@ function keyPressed() {
       // grid[tgt_y][tgt_x-1].colour = grid[tgt_y][tgt_x-1].trueColour
 
     } // right  // D, NUMPAD_6
-    if (keyCode === 104 || keyCode === 87) {
+    if (keyCode === 104 || keyCode === 87 || keyCode === 38) {
       // console.log("UP")
       if ((tgt_r == 3 && tgt_y-shpLng>0) ||(tgt_r != 3 && tgt_y>0)) {
         tgt_y-- // not sure i actually need this but i kinda like it so i'm keeping it
@@ -514,22 +528,39 @@ function keyPressed() {
       }
 
       console.log("SHIP PLACED")
+      // console.log(loc_p1_grid);
+      // console.log(loc_p2_grid);
+
 
       tgt_r = 0;
       tgt_x = 0;
       tgt_y = 0;
 
       if (turn == 1) {
-        placeShip(loc_p1_grid, player.ships[a_s].loc);
-        drawShip(player_1.ships[a_s+1].loc)
+        placeShip(loc_p1_grid, loc_p2_grid, player.ships[a_s].loc);
+        drawShip(loc_p1_grid, player_1.ships[a_s].loc)
       }
       else {
-        placeShip(loc_p2_grid, player.ships[a_s].loc)
-        drawShip(player_2.ships[a_s+1].loc)
+        placeShip(loc_p2_grid, loc_p1_grid, player.ships[a_s].loc)
+        drawShip(loc_p2_grid, player_2.ships[a_s].loc)
       }
     } // confirm // SPACE, ENTER, NUMPAD_ENTER
+
+
   }
 
+  if (keyCode === 16 || keyCode === 18) {
+    // if (tempTurn == 1) {
+    //   draw_grid(loc_p2_grid);
+    //   tempTurn *= -1;
+    // } else if (tempTurn == -1) {
+    //   draw_grid(loc_p1_grid);
+    //   tempTurn *= -1;
+    // }
+    changeTurn();
+
+
+  }
 
 }
 
