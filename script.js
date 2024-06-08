@@ -311,6 +311,37 @@ function placeShip(gridP1, gridP2, ship) {
 }
 
 
+
+
+
+function canRotate(coords) {
+  for (let j = 0; j < coords.length; j++) {
+    // console.log(coords[j])
+    if (coords[j][0] < 0 || coords[j][1] < 0 || coords[j][0] > 9 || coords[j][1] > 9) {
+      return false;
+    }
+  }
+} // checks if the coordinates the ship is being rotated to are within the battlefield's borders
+
+
+
+function flashy(coords, grid) {
+  for (let f = 0; f < coords.length; f++) {
+    grid[coords[f][0]][coords[f][1]].colour = "red";
+    // something to make it wait
+    grid[coords[f][0]][coords[f][1]].colour = grid[coords[f][0]][coords[f][1]].trueColour;
+
+  }
+} // meant to be used to flash location when the ship can't go there, but i'm not gonna code that rn
+
+
+
+
+
+///////////////////////////////////////////   Event Functions   ///////////////////////////////////////////
+
+
+
 function keyPressed() {
   // console.log(player_1.ships[a_s].length)
   let player;
@@ -324,8 +355,8 @@ function keyPressed() {
   }
   // console.log(player.ships[a_s].loc);
   // i'm very confident that this is actually very bad practice and probably brings a lot of issues with it
-  // but i don't know how else to pass player_1 or player_2 to this function when it's their turn and this seems to work
-  // so i'll stick with it and i'll fight you over it
+  // but i don't know how else to pass player_1 or player_2 to this function when it's their turn and this seems to work entirely because JS copies by reference instead of value
+  // i genuinely never thought my life would actually be easier because of something i despise so much
 
   if (placeShips) {
     let shpLng = player.ships[a_s].loc.length;
@@ -549,6 +580,7 @@ function keyPressed() {
 
   }
 
+  /*
   if (keyCode === 16 || keyCode === 18) {
     // if (tempTurn == 1) {
     //   draw_grid(loc_p2_grid);
@@ -561,29 +593,21 @@ function keyPressed() {
 
 
   }
+  */
+}
+
+
+function mouseClicked() {
+  // shooting at boats
+  // find which coordinate the mouse is hovering over when it is clicked
+  // check that tile for a ship
+  // set that tile and the corresponding tile on the other player's grid (y+11) beenHit true or false whether there was a boat there
+
 
 }
 
 
-function canRotate(coords) {
-  for (let j = 0; j < coords.length; j++) {
-    // console.log(coords[j])
-    if (coords[j][0] < 0 || coords[j][1] < 0 || coords[j][0] > 9 || coords[j][1] > 9) {
-      return false;
-    }
-  }
-} // checks if the coordinates the ship is being rotated to are within the battlefield's borders
 
-
-
-function flashy(coords, grid) {
-  for (let f = 0; f < coords.length; f++) {
-    grid[coords[f][0]][coords[f][1]].colour = "red";
-    // something to make it wait
-    grid[coords[f][0]][coords[f][1]].colour = grid[coords[f][0]][coords[f][1]].trueColour;
-
-  }
-} // meant to be used to flash location when the ship can't go there, but i'm not gonna code that rn
 
 
 // function log(str) {
