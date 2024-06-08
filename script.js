@@ -40,6 +40,7 @@ let player_2;
 // booleans
 
 let tempTurn = 1;
+let prevActive = [0,0];
 
 let turn = 1; // between 1 and -1
 let placeShips = true;
@@ -56,19 +57,32 @@ class Tile {
   #trueColour;
   #hasShip = false;
   #beenHit = false;
+  #isTGT;
 
-  constructor(colour, value) {
+  constructor(colour, isTGT) {
     this.colour = colour;
-    this.#trueColour = colour
-    this.value = value;
+    this.#trueColour = colour;
+    this.#isTGT = isTGT;
   }
 
   get trueColour() {return this.#trueColour}
   get hasShip() {return this.#hasShip};
   get beenHit() {return this.#beenHit};
 
-  set hasShip(item) {this.#hasShip = item; this.#trueColour = "gray"};
-  set beenHit(item) {this.#beenHit = item};
+  set hasShip(item) {
+    this.#hasShip = item;
+    if (this.#isTGT == false) {
+      this.#trueColour = "gray";
+    }
+  };
+  set beenHit(item) {
+    this.#beenHit = item;
+    if (this.#hasShip == true) {
+      this.#trueColour = "red"
+    } else {
+      this.#trueColour = "white"
+    }
+  }
 
   resetColour() {
     this.colour = this.#trueColour;
@@ -194,17 +208,82 @@ function setup() {
 }
 
 
+
+
+function draw() {
+
+
+  if (turn == 1) {
+    draw_grid(loc_p1_grid, COLS, ROWS);
+  } else if (turn == -1) {
+    draw_grid(loc_p2_grid, COLS, ROWS);
+
+  }
+
+}
+
+function draw_grid(grid, x, y) {
+  let width = Math.floor(CVS_WIDTH/x);
+  let height = Math.floor(CVS_HEIGHT/y);
+
+  // Center the grid on the canvas if there's a rounding error
+  let x_buffer = (CVS_WIDTH - width*x)/2
+  let y_buffer = (CVS_HEIGHT - height*y)/2
+
+
+  for (let row = 0; row < y; row++) {
+    for (let col = 0; col < x; col++) {
+      if (grid[row][col].colour == "gray") {
+        noStroke();
+      } else {stroke([5,51,128])}
+      if (row == 10) {
+        noStroke();
+        grid[row][col].colour = "white"
+      }
+      // Fill the square with the r,g,b values from the model
+      fill(grid[row][col].colour);
+      rect(col*width + x_buffer, row*height + y_buffer, width, height);
+    }
+    let tileX = CVS_WIDTH / COLS;
+    let tileY = CVS_HEIGHT / ROWS;
+    let activeX = (mouseX - (mouseX % tileX)) / tileX;
+    let activeY = (mouseY - (mouseY % tileY)) / tileY;
+
+    grid[prevActive[0]][prevActive[1]].resetColour();
+    cursor(ARROW)
+    if (activeX < COLS && activeY < ROWS && activeY > 10) {
+      grid[activeY][activeX].colour = [151,95,150];
+      prevActive = [activeY, activeX];
+      cursor(CROSS)
+    }
+  }
+
+
+
+
+
+}
+
+
+
+
+
+
 function grid_gen(grid) {
+  let tgt_coord = false;
   for (let y = 0; y < ROWS; y++) {
     grid[y] = [];
+    if (y > 10) {
+      tgt_coord = true;
+    }
     for (let x = 0; x < COLS; x++) {
 
       if ((x+y) % 2 == 0) {
-        // grid[y].push(new Tile([0, 60, 120], 0));
-        grid[y].push(new Tile([0, 120, 230], 0));
+        // grid[y].push(new Tile([0, 60, 120]));
+        grid[y].push(new Tile([0, 120, 230], tgt_coord));
       } else {
-        // grid[y].push(new Tile([0,65,120], 0));
-        grid[y].push(new Tile([0, 130, 230], 0));
+        // grid[y].push(new Tile([0,65,120]));
+        grid[y].push(new Tile([0, 130, 230], tgt_coord));
       }
 
     }
@@ -228,48 +307,6 @@ function changeTurn() {
 
 
 
-
-
-
-// Draw a new frame of the scene
-function draw() {
-  // Clear the screen with a grey rectangle
-  background(220);
-
-  // Draw the grid
-  if (turn == 1) {
-    draw_grid(loc_p1_grid, COLS, ROWS);
-  } else if (turn == -1) {
-    draw_grid(loc_p2_grid, COLS, ROWS);
-
-  }
-}
-
-function draw_grid(grid, x, y) {
-  // Get the size of each square
-  let width = Math.floor(CVS_WIDTH/x);
-  let height = Math.floor(CVS_HEIGHT/y);
-
-  // Center the grid on the canvas if there's a rounding error
-  let x_buffer = (CVS_WIDTH - width*x)/2
-  let y_buffer = (CVS_HEIGHT - height*y)/2
-
-
-  for (let row = 0; row < y; row++) {
-    for (let col = 0; col < x; col++) {
-      if (grid[row][col].colour == "gray") {
-        noStroke();
-      } else {stroke([5,51,128])}
-      if (row == 10) {
-        noStroke();
-        grid[row][col].colour = "white"
-      }
-      // Fill the square with the r,g,b values from the model
-      fill(grid[row][col].colour);
-      rect(col*width + x_buffer, row*height + y_buffer, width, height);
-    }
-  }
-}
 
 
 
@@ -300,7 +337,7 @@ function placeShip(gridP1, gridP2, ship) {
   a_s++;
   for (let i = 0; i < ship.length; i++) {
     gridP1[ship[i][0]][ship[i][1]].hasShip = true;
-    gridP2[ship[i][0]+10][ship[i][1]].hasShip = true;
+    gridP2[ship[i][0]+11][ship[i][1]].hasShip = true;
   }
 
   if (a_s > 4) {
@@ -336,7 +373,37 @@ function flashy(coords, grid) {
 
 
 
+function moveShip(grid, player, shpLng, c,p) {
+  for (let i = 0; i < shpLng; i++) {
+    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
+  } // clears old boat before drawing new boat
+  for (let i = 0; i < shpLng; i++) {
+    player.ships[a_s].loc[i][c]+=p;
+    if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+      grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+    } else {
+      grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+    }
 
+  } // draws new boat after clearing old boat
+}
+
+
+
+function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
+  if (y > 11) {return -1} // checking if the mouse was clicked on the targeting grid
+  console.log(loc_p1_grid[y][x], y, x)
+  console.log("SHELL FIRED");
+  grid_p1[y][x].beenHit = true;
+  grid_p2[y][x].beenHit = true;
+  p1.shots_fired++;
+
+  if (grid_p1[y][x].hasShip == true) {
+    console.log("HIT");
+  } else {
+    console.log("MISS");
+  }
+}
 
 ///////////////////////////////////////////   Event Functions   ///////////////////////////////////////////
 
@@ -365,19 +432,7 @@ function keyPressed() {
       // console.log("DOWN")
       if ((tgt_r == 1 && tgt_y+shpLng<10) || (tgt_r != 1 && tgt_y<9)) {
         tgt_y++
-
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-        } // clears old boat before drawing new boat
-        for (let i = 0; i < shpLng; i++) {
-          player.ships[a_s].loc[i][0]++;
-          if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
-          } else {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-          }
-
-        } // draws new boat after clearing old boat
+        moveShip(grid, player, shpLng, 0, 1);
       } else {return -1}
 
       // grid[tgt_y][tgt_x].colour = [151,95,150]
@@ -387,18 +442,7 @@ function keyPressed() {
       // console.log("LEFT")
       if ((tgt_r == 2 && tgt_x-shpLng>0) ||(tgt_r != 2 && tgt_x>0)) {
         tgt_x--
-
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-        } // clears old boat before drawing new boat
-        for (let i = 0; i < shpLng; i++) {
-          player.ships[a_s].loc[i][1]--;
-          if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
-          } else {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-          }
-        } // draws new boat after clearing old boat
+        moveShip(grid, player, shpLng, 1, -1);
       } else {return -1}
 
       // grid[tgt_y][tgt_x].colour = [151,95,150]
@@ -409,18 +453,7 @@ function keyPressed() {
       // console.log("RIGHT")
       if ((tgt_r == 0 && tgt_x+shpLng<10) || (tgt_r != 0 && tgt_x<9)) {
         tgt_x++
-
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-        } // clears old boat before drawing new boat
-        for (let i = 0; i < shpLng; i++) {
-          player.ships[a_s].loc[i][1]++;
-          if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
-          } else {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-          }        } // draws new boat after clearing old boat
-
+        moveShip(grid, player, shpLng, 1, 1);
       } else {return -1}
 
       // grid[tgt_y][tgt_x].colour = [151,95,150]
@@ -431,18 +464,7 @@ function keyPressed() {
       // console.log("UP")
       if ((tgt_r == 3 && tgt_y-shpLng>0) ||(tgt_r != 3 && tgt_y>0)) {
         tgt_y-- // not sure i actually need this but i kinda like it so i'm keeping it
-
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-        } // clears old boat before drawing new boat
-        for (let i = 0; i < shpLng; i++) {
-          player.ships[a_s].loc[i][0]--;
-          if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
-          } else {
-            grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-          }
-        } // draws new boat after clearing old boat
+        moveShip(grid, player, shpLng, 0, -1);
       } else {return -1}
 
       // grid[tgt_y][tgt_x].colour = [151,95,150]
@@ -487,7 +509,6 @@ function keyPressed() {
           // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
 
         }
-
         if (canRotate(player.ships[a_s].loc) == false) {
           tgt_r--;
           for (let k = 0; k < shpLng; k++) {
@@ -496,7 +517,6 @@ function keyPressed() {
             grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
           }
         }
-
 
       } else if (tgt_r == 3) {
         for (let i = 0; i < shpLng; i++) {
@@ -547,7 +567,7 @@ function keyPressed() {
       }
 
     } // rotate  // R, NUMPAD_PLUS
-
+    // i can definitely condense this into one function for each rotation but i want to make the rest of the game work first, i might never get around to condensing this
     if (keyCode === 32 || keyCode === 13) {
       console.log("CONFIRM")
 
@@ -602,7 +622,24 @@ function mouseClicked() {
   // find which coordinate the mouse is hovering over when it is clicked
   // check that tile for a ship
   // set that tile and the corresponding tile on the other player's grid (y+11) beenHit true or false whether there was a boat there
+  // if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
 
+  let tileX = CVS_WIDTH / COLS;
+  let tileY = CVS_HEIGHT / ROWS;
+  let activeX = (mouseX - (mouseX % tileX)) / tileX;
+  let activeY = (mouseY - (mouseY % tileY)) / tileY;
+  // i have this code up in draw_grid so i could probably just make a helper function so i dont need the code twice but whatever lol
+
+
+  if (turn == 1) {
+    fireAtCoords(loc_p1_grid, loc_p2_grid, player_1, player_2, activeX, activeY);
+    console.log("shoot:", activeY, activeX);
+  } else if (turn == -1) {
+    fireAtCoords(loc_p2_grid, loc_p1_grid, player_2, player_1, activeX, activeY);
+    console.log("shoot:", activeY, activeX);
+
+
+  }
 
 }
 
