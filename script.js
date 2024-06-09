@@ -20,7 +20,7 @@ const Y = CVS_HEIGHT / ROWS;
 // values for targeting / placing ships on coordinates
 let tgt_x = 0;
 let tgt_y = 0;
-let tgt_r = 0;
+let tgt_r = -1;
 
 let loc_cvs;
 let tgt_cvs;
@@ -196,7 +196,7 @@ function setup() {
 
   // loc_cvs.parent("loc_cvs_div");
   // tgt_cvs.parent("tgt_cvs_div");
-  loc_cvs.position(10,10, "fixed");
+  loc_cvs.position(10,10, "static");
 
   // tgt_p1_grid.position(400,400);
   // Initialize the grid to all white squares
@@ -236,7 +236,7 @@ function draw_grid(grid, x, y) {
   let activeX = (mouseX - (mouseX % tileX)) / tileX;
   let activeY = (mouseY - (mouseY % tileY)) / tileY;
 
-  // grid[prevActive[0]][prevActive[1]].resetColour();
+5
   cursor(ARROW);
 
   for (let row = 0; row < y; row++) {
@@ -251,7 +251,7 @@ function draw_grid(grid, x, y) {
        if (activeX < COLS && activeY < ROWS && activeY > 10) {
       // grid[activeY][activeX]
       // stroke("green")
-      prevActive = [activeY, activeX];
+
       cursor(CROSS)
     }
       // Fill the square with the r,g,b values from the model
@@ -423,6 +423,7 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   }
 
   // wait for a few seconds before switching turn
+  // setTimeout(changeTurn(), 5000); // doesn't want to work, not sure why and i'm pretty sure i'm using it correctly so i'm just not gonna use it
   changeTurn();
 
 }
@@ -462,7 +463,7 @@ function keyPressed() {
     } // up     // W, NUMPAD_8
     if (keyCode === 100 || keyCode === 65 || keyCode === 37) {
       // console.log("LEFT")
-      if ((tgt_r == 2 && tgt_x-shpLng>0) ||(tgt_r != 2 && tgt_x>0)) {
+      if ((tgt_x>0)) {
         tgt_x--
         moveShip(grid, player, shpLng, 1, -1);
       } else {return -1}
@@ -473,7 +474,7 @@ function keyPressed() {
     } // left   // A, NUMPAD_4
     if (keyCode === 102 || keyCode === 68 || keyCode === 39) {
       // console.log("RIGHT")
-      if ((tgt_r == 0 && tgt_x+shpLng<10) || (tgt_r != 0 && tgt_x<9)) {
+      if ((tgt_r == -1 && tgt_x+shpLng<10) || (tgt_r != -1 && tgt_x<9)) {
         tgt_x++
         moveShip(grid, player, shpLng, 1, 1);
       } else {return -1}
@@ -484,7 +485,7 @@ function keyPressed() {
     } // right  // D, NUMPAD_6
     if (keyCode === 104 || keyCode === 87 || keyCode === 38) {
       // console.log("UP")
-      if ((tgt_r == 3 && tgt_y-shpLng>0) ||(tgt_r != 3 && tgt_y>0)) {
+      if ((tgt_y>0)) {
         tgt_y-- // not sure i actually need this but i kinda like it so i'm keeping it
         moveShip(grid, player, shpLng, 0, -1);
       } else {return -1}
@@ -500,7 +501,7 @@ function keyPressed() {
       console.log(tgt_r);
       // let saveCoords = structuredClone(player.ships[a_s].loc);
 
-      if (tgt_r == 3) {tgt_r = 0} else {tgt_r++}
+      tgt_r *= -1;
 
       // rotating the ship's coordinates
 
@@ -514,33 +515,14 @@ function keyPressed() {
         }
 
         if (canRotate(player.ships[a_s].loc) == false) {
-          tgt_r--;
+          tgt_r *= -1;
           for (let k = 0; k < shpLng; k++) {
             player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]-k
             player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]+k
             grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
           }
         }
-
-
-      } else if (tgt_r == 2) {
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-          player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]-i
-          player.ships[a_s].loc[i][1] = player.ships[a_s].loc[i][1]-i
-          // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
-
-        }
-        if (canRotate(player.ships[a_s].loc) == false) {
-          tgt_r--;
-          for (let k = 0; k < shpLng; k++) {
-            player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]+k
-            player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]+k
-            grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
-          }
-        }
-
-      } else if (tgt_r == 3) {
+      } else if (tgt_r == -1) {
         for (let i = 0; i < shpLng; i++) {
           grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
           player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]-i
@@ -550,34 +532,13 @@ function keyPressed() {
         }
 
         if (canRotate(player.ships[a_s].loc) == false) {
-          tgt_r--;
+          tgt_r *= -1;
           for (let k = 0; k < shpLng; k++) {
             player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]+k
             player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]-k
             grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
           }
         }
-
-
-      } else if (tgt_r == 0){
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-          player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]+i
-          player.ships[a_s].loc[i][1] = player.ships[a_s].loc[i][1]+i
-          // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
-
-        }
-
-        if (canRotate(player.ships[a_s].loc) == false) {
-          tgt_r--;
-          for (let k = 0; k < shpLng; k++) {
-            player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]-k
-            player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]-k
-            grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
-          }
-        }
-
-
       }
 
       for (let i = 0; i < shpLng; i++) {
@@ -605,7 +566,7 @@ function keyPressed() {
       // console.log(loc_p2_grid);
 
 
-      tgt_r = 0;
+      tgt_r = -1;
       tgt_x = 0;
       tgt_y = 0;
 
@@ -639,11 +600,7 @@ function keyPressed() {
 }
 
 
-function mouseClicked() {
-  // shooting at boats
-  // find which coordinate the mouse is hovering over when it is clicked
-  // check that tile for a ship
-  // set that tile and the corresponding tile on the other player's grid (y+11) beenHit true or false whether there was a boat there
+function mousePressed(event) {
   // if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
 
   let tileX = CVS_WIDTH / COLS;
@@ -652,14 +609,25 @@ function mouseClicked() {
   let activeY = (mouseY - (mouseY % tileY)) / tileY;
   // i have this code up in draw_grid so i could probably just make a helper function so i dont need the code twice but whatever lol
 
-
   if (turn == 1) {
-    fireAtCoords(loc_p1_grid, loc_p2_grid, player_1, player_2, activeY, activeX);
+    if (event.button === 2 && activeY > 10) {
+      loc_p1_grid[prevActive[0]][prevActive[1]].resetColour(); // lets the player mark coordinates without firing on them if they want to think for a moment
+      loc_p1_grid[activeY][activeX].colour = [128,80,190]
+      prevActive = [activeY, activeX];
+    } else if (event.button === 0) {
+      fireAtCoords(loc_p1_grid, loc_p2_grid, player_1, player_2, activeY, activeX);
     // console.log("shoot:", activeY, activeX);
-  } else if (turn == -1) {
-    fireAtCoords(loc_p2_grid, loc_p1_grid, player_2, player_1, activeY, activeX);
-    // console.log("shoot:", activeY, activeX);
+    }
 
+  } else if (turn == -1) {
+    if (event.button === 2 && activeY > 10) {
+      loc_p2_grid[prevActive[0]][prevActive[1]].resetColour();
+      loc_p2_grid[activeY][activeX].colour = [128,80,190]
+      prevActive = [activeY, activeX];
+    } else if (event.button === 0) {
+      fireAtCoords(loc_p2_grid, loc_p1_grid, player_2, player_1, activeY, activeX);
+    // console.log("shoot:", activeY, activeX);
+    }
 
   }
 
