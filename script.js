@@ -138,10 +138,10 @@ class Ship {
   // #coordinates;
   #rotation;
 
-  constructor(coords, type, name, rotation) {
+  constructor(length, type, name, rotation) {
     this.#type = type;
     this.#name = name;
-    for (let a = 0; a < coords; a++) {
+    for (let a = 0; a < length; a++) {
       this.#coords.push([0,a,false])
     }
     // this.#coordinates = coordinates;
@@ -161,10 +161,12 @@ class Ship {
 
   stillAlive() {
     for (let l = 0; l < this.#coords.length; l++) {
-      if (this.coords[l][2] == false) {
+      if (this.#coords[l][2] == false) {
         return true;
       }
     }
+    this.#seaworthy = false;
+    return false;
   }
 }
 
@@ -280,10 +282,10 @@ function draw_grid(grid, x, y) {
 
 
 function grid_gen(grid) {
-  let tgt_coord = false;
+  let tgt_coord;
   for (let y = 0; y < ROWS; y++) {
     grid[y] = [];
-
+    tgt_coord = false;
     for (let x = 0; x < COLS; x++) {
       if (x > 11) {
         tgt_coord = true;
@@ -350,7 +352,7 @@ function placeShip(gridP1, gridP2, ship) {
   a_s++;
   for (let i = 0; i < ship.length; i++) {
     gridP1[ship[i][0]][ship[i][1]].hasShip = true;
-    gridP2[ship[i][0]+11][ship[i][1]].hasShip = true;
+    gridP2[ship[i][0]][ship[i][1]+12].hasShip = true;
   }
 
   if (a_s > 4) {
@@ -394,9 +396,12 @@ function flashy(coords, grid) {
 
 
 function moveShip(grid, player, shpLng, c,p) {
+  // c is either 0 or 1 for the y or x
+  // p is either 1 or -1 to move the ship that direction
   for (let i = 0; i < shpLng; i++) {
     grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-  } // clears old boat before drawing new boat
+  } // clears old boat's place before drawing new boat
+
   for (let i = 0; i < shpLng; i++) {
     player.ships[a_s].loc[i][c]+=p;
     if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
@@ -404,7 +409,6 @@ function moveShip(grid, player, shpLng, c,p) {
     } else {
       grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
     }
-
   } // draws new boat after clearing old boat
 }
 
@@ -418,33 +422,40 @@ function markTile(grid, y, x) {
 
 function hitShip(player, coords) {
   for (let q = 0; q < 5; q++) {
-    for (let r = 0; r < player.ships[q].length; r++) {
-      if (player.ships[q].coords[r] == coords) {player.ships[q].coords[r][2] = true}
-    } // finds which part of which ship was hit, then lets the ship know it was shot
+    // console.log(player.ships[q])
+    for (let r = 0; r < player.ships[q].loc.length; r++) {
+      // console.log(player.ships[q].loc, coords)
+      if (player.ships[q].loc[r][0] == coords[0] && player.ships[q].loc[r][1] == coords[1]) {
+        player.ships[q].loc[r][2] = true;
+        if (player.ships[q].stillAlive() == false) {player.ships_left--}
+        console.log(player.ships[q].loc[r]);
+        console.log(player.ships_left);
+        return;
+      }
+    } // finds which part of which ship was hit, then lets the ship know it was shot there
   }
-  for (let s = 0; x < 5; x++) {
-    player.ships[x].stillAlive();
-  }
+
 }
+
 
 function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   if (shellFired) {return -1} // checking if the player has already shot this turn
   if (x <= 11) {return -1} // checking if the mouse was clicked on the targeting grid
   if (grid_p1[y][x].beenHit) {return -1} // checking if the tile was already shot at
-  console.log("SHELL FIRED");
+  // console.log("SHELL FIRED");
   shellFired = true;
   grid_p1[y][x].beenHit = true;
   grid_p2[y][x-12].beenHit = true;
-  hitShip(p2, [y,x]);
+  hitShip(p2, [y,x-12]);
   p1.shots_fired++;
   // console.log(loc_p1_grid[y][x], y, x)
   grid_p1[y][x].resetColour();
 
   if (grid_p1[y][x].hasShip == true) {
-    console.log("HIT");
+    // console.log("HIT");
     // grid_p1[y][x].colour = "red";
   } else {
-    console.log("MISS");
+    // console.log("MISS");
     // grid_p1[y][x].colour = "white";
   }
 
