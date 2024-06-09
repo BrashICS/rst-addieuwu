@@ -228,7 +228,6 @@ function draw_grid(grid, x, y) {
   let width = Math.floor(CVS_WIDTH/x);
   let height = Math.floor(CVS_HEIGHT/y);
 
-  // Center the grid on the canvas if there's a rounding error
   let x_buffer = (CVS_WIDTH - width*x)/2
   let y_buffer = (CVS_HEIGHT - height*y)/2
 
@@ -237,7 +236,7 @@ function draw_grid(grid, x, y) {
   let activeX = (mouseX - (mouseX % tileX)) / tileX;
   let activeY = (mouseY - (mouseY % tileY)) / tileY;
 
-  grid[prevActive[0]][prevActive[1]].resetColour();
+  // grid[prevActive[0]][prevActive[1]].resetColour();
   cursor(ARROW);
 
   for (let row = 0; row < y; row++) {
@@ -504,7 +503,7 @@ function keyPressed() {
       if (tgt_r == 3) {tgt_r = 0} else {tgt_r++}
 
       // rotating the ship's coordinates
-      // there's probably a way i can do this in like four lines but i'm running short on time so i gotta zoom
+
       if (tgt_r == 1) {
         for (let i = 0; i < shpLng; i++) {
           grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
