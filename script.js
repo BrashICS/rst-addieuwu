@@ -9,10 +9,10 @@
 'use strict';
 
 
-const CVS_WIDTH = 300;
-const CVS_HEIGHT = 630;
-const ROWS = 21;
-const COLS = 10;
+const CVS_WIDTH = 660;
+const CVS_HEIGHT = 300;
+const ROWS = 10;
+const COLS = 22; // the two grids are the same grid, they are separated by a 2 tile wide gap of nothing tiles
 
 const X = CVS_WIDTH / COLS;
 const Y = CVS_HEIGHT / ROWS;
@@ -20,19 +20,18 @@ const Y = CVS_HEIGHT / ROWS;
 // values for targeting / placing ships on coordinates
 let tgt_x = 0;
 let tgt_y = 0;
-let tgt_r = -1;
+let tgt_r = -1; // toggles between 1 and -1
 
 let loc_cvs;
 let tgt_cvs;
-// let tgt_p1_cvs;
-// let tgt_p2_cvs;
 
-let frames = 0; // used to count seconds, increases by 1 every time draw() runs and resets when it gets to 60
-
-let tempShip = [[0,0],[0,1],[0,2]];
+// let tempShip = [[0,0],[0,1],[0,2]];
+let a_s = 0; // short for activeShip, changed to a_s because activeShip was a bunch of characters and made the code minimally harder for me to read
 
 let loc_p1_grid = [];
 let loc_p2_grid = [];
+let prevActive = [0,0];
+
 
 let player_1;
 let player_2;
@@ -40,12 +39,9 @@ let player_2;
 
 // booleans
 
-let tempTurn = 1;
-let prevActive = [0,0];
-
+let shellFired = false;
 let turn = 1; // between 1 and -1
 let placeShips = true;
-let a_s = 0; // short for activeShip, changed to a_s because activeShip was a bunch of characters and made the code minimally harder for me to read
 
 
 
@@ -137,16 +133,16 @@ class Player {
 class Ship {
   #type = "" // type of ship, used for text alert when the ship has been destroyed
   #seaworthy = true; // if ship is still alive
-  #length = []; // length of ship
+  #coords = []; // coordinates for each section of the ship
   #name; // name of ship, used for text alert when the ship has been destroyed
   // #coordinates;
   #rotation;
 
-  constructor(length, type, name, rotation) {
+  constructor(coords, type, name, rotation) {
     this.#type = type;
     this.#name = name;
-    for (let a = 0; a < length; a++) {
-      this.#length.push([0,a,false])
+    for (let a = 0; a < coords; a++) {
+      this.#coords.push([0,a,false])
     }
     // this.#coordinates = coordinates;
     this.#rotation = rotation;
@@ -154,7 +150,7 @@ class Ship {
 
 
   get name() {return this.#name}
-  get loc() {return this.#length} // loc short for location
+  get loc() {return this.#coords} // loc short for location
   // get coordinates() {return this.#coordinates}
 
   // set coordinates(item) {this.#coordinates = item}
@@ -162,6 +158,14 @@ class Ship {
 
   get seaworthy() {return this.#seaworthy}
   set seaworthy(item) {this.#seaworthy = item}
+
+  stillAlive() {
+    for (let l = 0; l < this.#coords.length; l++) {
+      if (this.coords[l][2] == false) {
+        return true;
+      }
+    }
+  }
 }
 
 
@@ -244,11 +248,11 @@ function draw_grid(grid, x, y) {
       if (grid[row][col].colour == "gray") {
         noStroke();
       } else {stroke([5,51,128])}
-      if (row == 10) {
+      if (col == 10 || col == 11) {
         noStroke();
         grid[row][col].colour = "white"
       }
-       if (activeX < COLS && activeY < ROWS && activeY > 10) {
+       if (activeX < COLS && activeY < ROWS && activeX > 11) {
       // grid[activeY][activeX]
       // stroke("green")
 
@@ -279,11 +283,11 @@ function grid_gen(grid) {
   let tgt_coord = false;
   for (let y = 0; y < ROWS; y++) {
     grid[y] = [];
-    if (y > 10) {
-      tgt_coord = true;
-    }
-    for (let x = 0; x < COLS; x++) {
 
+    for (let x = 0; x < COLS; x++) {
+      if (x > 11) {
+        tgt_coord = true;
+      }
       if ((x+y) % 2 == 0) {
         // grid[y].push(new Tile([0, 60, 120]));
         grid[y].push(new Tile([0, 120, 230], tgt_coord));
@@ -301,11 +305,14 @@ function grid_gen(grid) {
 
 function changeTurn() {
   turn *= -1;
+  shellFired = false;
   // do some shtuff to hide the current screen, then ask for the other user's password, then reveal screen
   if (turn == 1) {
     draw_grid(loc_p1_grid);
+    loc_p1_grid[prevActive[0]][prevActive[1]].resetColour();
   } else {
     draw_grid(loc_p2_grid);
+    loc_p2_grid[prevActive[0]][prevActive[1]].resetColour();
   }
   console.log("turn changed: "+turn);
 }
@@ -402,14 +409,33 @@ function moveShip(grid, player, shpLng, c,p) {
 }
 
 
+function markTile(grid, y, x) {
+  grid[prevActive[0]][prevActive[1]].resetColour();
+  grid[y][x].colour = [128,80,190];
+  prevActive = [y, x];
+}
+
+
+function hitShip(player, coords) {
+  for (let q = 0; q < 5; q++) {
+    for (let r = 0; r < player.ships[q].length; r++) {
+      if (player.ships[q].coords[r] == coords) {player.ships[q].coords[r][2] = true}
+    } // finds which part of which ship was hit, then lets the ship know it was shot
+  }
+  for (let s = 0; x < 5; x++) {
+    player.ships[x].stillAlive();
+  }
+}
 
 function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
-  if (y <= 10) {return -1} // checking if the mouse was clicked on the targeting grid
-  // console.log(grid_p1[y][x], y, x)
-  // console.log(grid_p1[y][x])
+  if (shellFired) {return -1} // checking if the player has already shot this turn
+  if (x <= 11) {return -1} // checking if the mouse was clicked on the targeting grid
+  if (grid_p1[y][x].beenHit) {return -1} // checking if the tile was already shot at
   console.log("SHELL FIRED");
+  shellFired = true;
   grid_p1[y][x].beenHit = true;
-  grid_p2[y-11][x].beenHit = true;
+  grid_p2[y][x-12].beenHit = true;
+  hitShip(p2, [y,x]);
   p1.shots_fired++;
   // console.log(loc_p1_grid[y][x], y, x)
   grid_p1[y][x].resetColour();
@@ -424,7 +450,7 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
   // wait for a few seconds before switching turn
   // setTimeout(changeTurn(), 5000); // doesn't want to work, not sure why and i'm pretty sure i'm using it correctly so i'm just not gonna use it
-  changeTurn();
+  // changeTurn();
 
 }
 
@@ -583,20 +609,13 @@ function keyPressed() {
 
   }
 
-  /*
+  // /*
   if (keyCode === 16 || keyCode === 18) {
-    // if (tempTurn == 1) {
-    //   draw_grid(loc_p2_grid);
-    //   tempTurn *= -1;
-    // } else if (tempTurn == -1) {
-    //   draw_grid(loc_p1_grid);
-    //   tempTurn *= -1;
-    // }
     changeTurn();
 
 
   }
-  */
+  // */
 }
 
 
@@ -610,20 +629,16 @@ function mousePressed(event) {
   // i have this code up in draw_grid so i could probably just make a helper function so i dont need the code twice but whatever lol
 
   if (turn == 1) {
-    if (event.button === 2 && activeY > 10) {
-      loc_p1_grid[prevActive[0]][prevActive[1]].resetColour(); // lets the player mark coordinates without firing on them if they want to think for a moment
-      loc_p1_grid[activeY][activeX].colour = [128,80,190]
-      prevActive = [activeY, activeX];
+    if (event.button === 2 && activeX > 11) {
+      markTile(loc_p1_grid, activeY, activeX);
     } else if (event.button === 0) {
       fireAtCoords(loc_p1_grid, loc_p2_grid, player_1, player_2, activeY, activeX);
     // console.log("shoot:", activeY, activeX);
     }
 
   } else if (turn == -1) {
-    if (event.button === 2 && activeY > 10) {
-      loc_p2_grid[prevActive[0]][prevActive[1]].resetColour();
-      loc_p2_grid[activeY][activeX].colour = [128,80,190]
-      prevActive = [activeY, activeX];
+    if (event.button === 2 && activeX > 11) {
+      markTile(loc_p2_grid, activeY, activeX);
     } else if (event.button === 0) {
       fireAtCoords(loc_p2_grid, loc_p1_grid, player_2, player_1, activeY, activeX);
     // console.log("shoot:", activeY, activeX);
