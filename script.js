@@ -396,10 +396,93 @@ function flashy(coords, grid) {
 
 
 
-function placing_ships(player, grid) {
+function placing_ships(player, grid, keyCode) {
 
+  let shpLng = player.ships[a_s].loc.length;
+
+  if (keyCode ===  98 || keyCode === 83 || keyCode === 40) {
+    // console.log("DOWN")
+    if ((tgt_r == 1 && tgt_y+shpLng<10) || (tgt_r != 1 && tgt_y<9)) {
+      tgt_y++
+      moveShip(grid, player, shpLng, 0, 1);
+    } else {return -1}
+  } // up     // W, NUMPAD_8, UP_ARROW
+
+  if (keyCode === 100 || keyCode === 65 || keyCode === 37) {
+    // console.log("LEFT")
+    if ((tgt_x>0)) {
+      tgt_x--
+      moveShip(grid, player, shpLng, 1, -1);
+    } else {return -1}
+
+  } // left   // A, NUMPAD_4, LEFT_ARROW
+
+  if (keyCode === 102 || keyCode === 68 || keyCode === 39) {
+    // console.log("RIGHT")
+    if ((tgt_r == -1 && tgt_x+shpLng<10) || (tgt_r != -1 && tgt_x<9)) {
+      tgt_x++
+      moveShip(grid, player, shpLng, 1, 1);
+    } else {return -1}
+
+  } // right  // D, NUMPAD_6, RIGHT_ARROW
+
+  if (keyCode === 104 || keyCode === 87 || keyCode === 38) {
+    // console.log("UP")
+    if ((tgt_y>0)) {
+      tgt_y-- // not sure i actually need this but i kinda like it so i'm keeping it
+      moveShip(grid, player, shpLng, 0, -1);
+    } else {return -1}
+
+  } // down   // S, NUMPAD_2, DOWN_ARROW
+
+
+  if (keyCode === 82  || keyCode === 107 || keyCode === 17) {
+    // console.log("ROTATE_SHIP");
+    // console.log(tgt_r);
+    tgt_r *= -1;
+    rotateShip(grid, player, shpLng, tgt_r);
+    for (let i = 0; i < shpLng; i++) {
+      drawNewShip(grid, player, i);
+    }
+
+
+  } // rotate  // R, NUMPAD_PLUS, CTRL
+
+
+  if (keyCode === 32 || keyCode === 13) {
+    console.log("CONFIRM")
+    for (let i = 0; i < shpLng; i++) {
+      if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+        console.log("COLLISION DETECTED");
+        return -1;
+      } // prevents two ships from occupying the same coordinate
+    }
+    console.log("SHIP PLACED")
+
+
+    tgt_r = -1;
+    tgt_x = 0;
+    tgt_y = 0;
+
+    if (turn == 1) {
+      placeShip(loc_p1_grid, loc_p2_grid, player.ships[a_s].loc);
+      drawShip(loc_p1_grid, player_1.ships[a_s].loc)
+    }
+    else {
+      placeShip(loc_p2_grid, loc_p1_grid, player.ships[a_s].loc)
+      drawShip(loc_p2_grid, player_2.ships[a_s].loc)
+    }
+  } // confirm // SPACE, ENTER, NUMPAD_ENTER
 }
 
+
+function drawNewShip(grid, player, i) {
+  if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+  } else {
+    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+  }
+}
 
 
 function moveShip(grid, player, shpLng, c,p) {
@@ -411,18 +494,29 @@ function moveShip(grid, player, shpLng, c,p) {
 
   for (let i = 0; i < shpLng; i++) {
     player.ships[a_s].loc[i][c]+=p;
-    if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-      grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
-    } else {
-      grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-    }
+    drawNewShip(grid, player, i);
   } // draws new boat after clearing old boat
 }
 
 
 
-function rotateShip(grid, player, shpLng, c, p) {
+function rotateShip(grid, player, shpLng, p) {
+  for (let i = 0; i < shpLng; i++) {
+    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
+    player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]+(p*i)
+    player.ships[a_s].loc[i][1] = player.ships[a_s].loc[i][1]-(p*i)
+    // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
 
+  }
+
+  if (canRotate(player.ships[a_s].loc) == false) {
+    tgt_r *= -1;
+    for (let k = 0; k < shpLng; k++) {
+      player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]+(p*k)
+      player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]-(p*k)
+      grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
+    }
+  }
 }
 
 
@@ -486,167 +580,32 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
 function keyPressed() {
   // console.log(player_1.ships[a_s].length)
-  let player;
-  let grid;
-  if (turn == 1) {
-    player = player_1;
-    grid = loc_p1_grid;
-  } else if (turn == -1){
-    player = player_2;
-    grid = loc_p2_grid;
-  }
+
   // console.log(player.ships[a_s].loc);
   // i'm very confident that this is actually very bad practice and probably brings a lot of issues with it
   // but i don't know how else to pass player_1 or player_2 to this function when it's their turn and this seems to work entirely because JS copies by reference instead of value
   // i genuinely never thought my life would actually be easier because of something i despise so much
 
   if (placeShips) {
-    let shpLng = player.ships[a_s].loc.length;
 
-    if (keyCode ===  98 || keyCode === 83 || keyCode === 40) {
-      // console.log("DOWN")
-      if ((tgt_r == 1 && tgt_y+shpLng<10) || (tgt_r != 1 && tgt_y<9)) {
-        tgt_y++
-        moveShip(grid, player, shpLng, 0, 1);
-      } else {return -1}
-
-      // grid[tgt_y][tgt_x].colour = [151,95,150]
-      // grid[tgt_y-1][tgt_x].colour = grid[tgt_y-1][tgt_x].trueColour
-    } // up     // W, NUMPAD_8
-    if (keyCode === 100 || keyCode === 65 || keyCode === 37) {
-      // console.log("LEFT")
-      if ((tgt_x>0)) {
-        tgt_x--
-        moveShip(grid, player, shpLng, 1, -1);
-      } else {return -1}
-
-      // grid[tgt_y][tgt_x].colour = [151,95,150]
-      // grid[tgt_y][tgt_x+1].colour = grid[tgt_y][tgt_x+1].trueColour
-
-    } // left   // A, NUMPAD_4
-    if (keyCode === 102 || keyCode === 68 || keyCode === 39) {
-      // console.log("RIGHT")
-      if ((tgt_r == -1 && tgt_x+shpLng<10) || (tgt_r != -1 && tgt_x<9)) {
-        tgt_x++
-        moveShip(grid, player, shpLng, 1, 1);
-      } else {return -1}
-
-      // grid[tgt_y][tgt_x].colour = [151,95,150]
-      // grid[tgt_y][tgt_x-1].colour = grid[tgt_y][tgt_x-1].trueColour
-
-    } // right  // D, NUMPAD_6
-    if (keyCode === 104 || keyCode === 87 || keyCode === 38) {
-      // console.log("UP")
-      if ((tgt_y>0)) {
-        tgt_y-- // not sure i actually need this but i kinda like it so i'm keeping it
-        moveShip(grid, player, shpLng, 0, -1);
-      } else {return -1}
-
-      // grid[tgt_y][tgt_x].colour = [151,95,150]
-      // grid[tgt_y+1][tgt_x].colour = grid[tgt_y+1][tgt_x].trueColour
-
-    } // down   // S, NUMPAD_2
-
-
-    if (keyCode === 82  || keyCode === 107) {
-      console.log("ROTATE_SHIP");
-      console.log(tgt_r);
-      // let saveCoords = structuredClone(player.ships[a_s].loc);
-
-      tgt_r *= -1;
-
-      // rotating the ship's coordinates
-
-      if (tgt_r == 1) {
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-          player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]+i
-          player.ships[a_s].loc[i][1] = player.ships[a_s].loc[i][1]-i
-          // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
-
-        }
-
-        if (canRotate(player.ships[a_s].loc) == false) {
-          tgt_r *= -1;
-          for (let k = 0; k < shpLng; k++) {
-            player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]-k
-            player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]+k
-            grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
-          }
-        }
-      } else if (tgt_r == -1) {
-        for (let i = 0; i < shpLng; i++) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-          player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]-i
-          player.ships[a_s].loc[i][1] = player.ships[a_s].loc[i][1]+i
-          // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
-
-        }
-
-        if (canRotate(player.ships[a_s].loc) == false) {
-          tgt_r *= -1;
-          for (let k = 0; k < shpLng; k++) {
-            player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]+k
-            player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]-k
-            grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
-          }
-        }
-      }
-
-      for (let i = 0; i < shpLng; i++) {
-        if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
-        } else {
-          grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-        }
-      }
-
-    } // rotate  // R, NUMPAD_PLUS
-    // i can definitely condense this into one function for each rotation but i want to make the rest of the game work first, i might never get around to condensing this
-    if (keyCode === 32 || keyCode === 13) {
-      console.log("CONFIRM")
-
-      for (let i = 0; i < shpLng; i++) {
-        if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-          console.log("COLLISION DETECTED");
-          return -1;
-        } // error checking, prevents two ships from occupying the same coordinate
-      }
-
-      console.log("SHIP PLACED")
-      // console.log(loc_p1_grid);
-      // console.log(loc_p2_grid);
-
-
-      tgt_r = -1;
-      tgt_x = 0;
-      tgt_y = 0;
-
-      if (turn == 1) {
-        placeShip(loc_p1_grid, loc_p2_grid, player.ships[a_s].loc);
-        drawShip(loc_p1_grid, player_1.ships[a_s].loc)
-      }
-      else {
-        placeShip(loc_p2_grid, loc_p1_grid, player.ships[a_s].loc)
-        drawShip(loc_p2_grid, player_2.ships[a_s].loc)
-      }
-    } // confirm // SPACE, ENTER, NUMPAD_ENTER
-
+    if (turn == 1) {
+      placing_ships(player_1, loc_p1_grid, keyCode)
+    } else if (turn == -1){
+      placing_ships(player_2, loc_p2_grid, keyCode)
+    }
 
   }
 
   // /*
   if (keyCode === 16 || keyCode === 18) {
     changeTurn();
-
-
-  }
+  } // just for testing so i can hotswap player turns
   // */
 }
 
 
 function mousePressed(event) {
-  // if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
+  if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
 
   let tileX = CVS_WIDTH / COLS;
   let tileY = CVS_HEIGHT / ROWS;
