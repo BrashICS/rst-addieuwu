@@ -42,8 +42,7 @@ let tgt_x = 0; // stores x value of current ship bow
 let tgt_y = 0; // stores y value of current ship bow
 let tgt_r = -1; // toggles between 1 and -1, stores rotation of current ship
 
-let loc_cvs; // main canvas
-let tgt_cvs; // not actually needed but just in cas
+let tgt_cvs; // main canvas
 
 // let tempShip = [[0,0],[0,1],[0,2]];
 let a_s = 0; // short for activeShip, changed to a_s because activeShip was a bunch of characters and made the code minimally harder for me to read
@@ -234,12 +233,10 @@ class Compartment {
 
 
 function setup() {
-  loc_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
-  // tgt_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
+  tgt_cvs = createCanvas(CVS_WIDTH, CVS_HEIGHT);
 
-  // loc_cvs.parent("loc_cvs_div");
-  // tgt_cvs.parent("tgt_cvs_div");
-  loc_cvs.position(10,10, "static");
+  tgt_cvs.parent("tgt_cvs_div");
+  tgt_cvs.position(10,10, "static");
 
   grid_gen(tgt_p1_grid);
   grid_gen(tgt_p2_grid);
@@ -371,16 +368,34 @@ function changeTurn() {
   shellFired = false;
   // do some shtuff to hide the current screen, then ask for the other user's password, then reveal screen
   // changes displayed grid, resets all to default colours
+
+  let grid_div = document.getElementById("tgt_cvs_div");
+  let pswd_div = document.getElementById("password_div");
+  grid_div.style.display = "none";
+  pswd_div.style.display = "block";
+
+
   if (turn == 1) {
+    password(player_1);
     draw_grid(tgt_p1_grid);
     tgt_p1_grid[prevActive[0]][prevActive[1]].resetColour();
     document.getElementById("turn").innerHTML = player_1.username+"'s turn";
   } else {
+    password(player_2);
     draw_grid(tgt_p2_grid);
     tgt_p2_grid[prevActive[0]][prevActive[1]].resetColour();
     document.getElementById("turn").innerHTML = player_2.username+"'s turn";
   }
+  grid_div.style.display = "block";
   console.log("turn changed: "+turn);
+}
+
+
+
+function password(player) {
+  if(document.getElementById("pswdBox") != player.password) {
+    return -1;
+  }
 }
 
 
