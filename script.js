@@ -395,6 +395,13 @@ function flashy(coords, grid) {
 
 
 
+
+function placing_ships(player, grid) {
+
+}
+
+
+
 function moveShip(grid, player, shpLng, c,p) {
   // c is either 0 or 1 for the y or x
   // p is either 1 or -1 to move the ship that direction
@@ -411,6 +418,14 @@ function moveShip(grid, player, shpLng, c,p) {
     }
   } // draws new boat after clearing old boat
 }
+
+
+
+function rotateShip(grid, player, shpLng, c, p) {
+
+}
+
+
 
 
 function markTile(grid, y, x) {
