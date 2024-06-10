@@ -298,7 +298,11 @@ function draw_grid(grid, x, y) {
       // Fill the square with the r,g,b values from the model
       fill(grid[row][col].colour);
       rect(col*width + x_buffer, row*height + y_buffer, width, height);
-      // grid[row][col].resetColour()
+      if (grid[row][col].beenHit == true) {
+        grid[row][col].resetColour();
+        // reset to default colours if all ships have been placed
+        // allows shots to show up when drawing the player side of the grid
+      }
     }
 
 
@@ -500,7 +504,7 @@ function placing_ships(player, grid, keyCode) {
     }
     console.log("SHIP PLACED")
 
-
+    // resets target coordinates to default values
     tgt_r = -1;
     tgt_x = 0;
     tgt_y = 0;
@@ -533,23 +537,24 @@ function moveShip(grid, player, shpLng, c,p) {
 
 
 
-function rotateShip(grid, player, shpLng, p) {
+function rotateShip(grid, player, shpLng) {
   for (let i = 0; i < shpLng; i++) {
     grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].resetColour()
-    player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]+(p*i)
-    player.ships[a_s].loc[i][1] = player.ships[a_s].loc[i][1]-(p*i)
+    player.ships[a_s].loc[i][0] = player.ships[a_s].loc[i][0]+(tgt_r*i)
+    player.ships[a_s].loc[i][1] = player.ships[a_s].loc[i][1]-(tgt_r*i)
     // console.log(player.ships[a_s].loc[i][0], player.ships[a_s].loc[i][1])
 
   }
-
   if (canRotate(player.ships[a_s].loc) == false) {
     tgt_r *= -1;
     for (let k = 0; k < shpLng; k++) {
-      player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]+(p*k)
-      player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]-(p*k)
+      player.ships[a_s].loc[k][0] = player.ships[a_s].loc[k][0]+(tgt_r*k)
+      player.ships[a_s].loc[k][1] = player.ships[a_s].loc[k][1]-(tgt_r*k)
       grid[player.ships[a_s].loc[k][0]][player.ships[a_s].loc[k][1]].colour = "gray";
     }
+
   }
+
 }
 
 
