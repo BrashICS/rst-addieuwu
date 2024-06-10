@@ -9,6 +9,15 @@
 'use strict';
 
 
+
+
+
+///////////////////////////////////////////   constants   ///////////////////////////////////////////
+
+
+
+
+
 const CVS_WIDTH = 660;
 const CVS_HEIGHT = 300;
 const ROWS = 10;
@@ -17,19 +26,30 @@ const COLS = 22; // the two grids are the same grid, they are separated by a 2 t
 const X = CVS_WIDTH / COLS;
 const Y = CVS_HEIGHT / ROWS;
 
-// values for targeting / placing ships on coordinates
-let tgt_x = 0;
-let tgt_y = 0;
-let tgt_r = -1; // toggles between 1 and -1
 
-let loc_cvs;
-let tgt_cvs;
+
+
+
+///////////////////////////////////////////   variables   ///////////////////////////////////////////
+
+
+
+
+
+
+// values for targeting / placing ships on coordinates
+let tgt_x = 0; // stores x value of current ship bow
+let tgt_y = 0; // stores y value of current ship bow
+let tgt_r = -1; // toggles between 1 and -1, stores rotation of current ship
+
+let loc_cvs; // main canvas
+let tgt_cvs; // not actually needed but just in cas
 
 // let tempShip = [[0,0],[0,1],[0,2]];
 let a_s = 0; // short for activeShip, changed to a_s because activeShip was a bunch of characters and made the code minimally harder for me to read
 
-let loc_p1_grid = [];
-let loc_p2_grid = [];
+let tgt_p1_grid = []; // grid for player 1
+let tgt_p2_grid = []; // grid for player 2
 let prevActive = [0,0];
 
 
@@ -37,7 +57,14 @@ let player_1;
 let player_2;
 
 
-// booleans
+
+
+
+///////////////////////////////////////////   booleans   ///////////////////////////////////////////
+
+
+
+
 
 let shellFired = false;
 let turn = 1; // between 1 and -1
@@ -46,7 +73,7 @@ let placeShips = true;
 
 
 
-// classes
+///////////////////////////////////////////   classes / objects   ///////////////////////////////////////////
 
 
 class Tile {
@@ -71,7 +98,8 @@ class Tile {
     if (this.#isTGT == false) {
       this.#trueColour = "gray";
     }
-  };
+  }
+
   set beenHit(item) {
     this.#beenHit = item;
     if (this.#hasShip == true) {
@@ -84,7 +112,10 @@ class Tile {
   resetColour() {
     this.colour = this.#trueColour;
   }
+
+  setEmpty(item) {this.#trueColour = [0,0,0,0]}
 }
+
 
 
 class Player {
@@ -190,7 +221,13 @@ class Compartment {
 
 
 
-// functions
+///////////////////////////////////////////   functions   ///////////////////////////////////////////
+
+
+
+
+
+///////////////////////////////////////////   game setup   ///////////////////////////////////////////
 
 
 
@@ -204,16 +241,12 @@ function setup() {
   // tgt_cvs.parent("tgt_cvs_div");
   loc_cvs.position(10,10, "static");
 
-  // tgt_p1_grid.position(400,400);
-  // Initialize the grid to all white squares
-  grid_gen(loc_p1_grid);
-  grid_gen(loc_p2_grid);
-  // grid_gen(tgt_p1_grid)
+  grid_gen(tgt_p1_grid);
+  grid_gen(tgt_p2_grid);
 
 
   initGame();
 }
-
 
 
 
@@ -222,13 +255,15 @@ function draw() {
   // frames++;
   // if (frames > 20) {frames = 1; console.log(": seconds")}
   if (turn == 1) {
-    draw_grid(loc_p1_grid, COLS, ROWS);
+    draw_grid(tgt_p1_grid, COLS, ROWS);
   } else if (turn == -1) {
-    draw_grid(loc_p2_grid, COLS, ROWS);
+    draw_grid(tgt_p2_grid, COLS, ROWS);
 
   }
 
 }
+
+
 
 function draw_grid(grid, x, y) {
   let width = Math.floor(CVS_WIDTH/x);
@@ -263,6 +298,7 @@ function draw_grid(grid, x, y) {
       // Fill the square with the r,g,b values from the model
       fill(grid[row][col].colour);
       rect(col*width + x_buffer, row*height + y_buffer, width, height);
+      // grid[row][col].resetColour()
     }
 
 
@@ -275,9 +311,6 @@ function draw_grid(grid, x, y) {
 
 
 }
-
-
-
 
 
 
@@ -305,26 +338,6 @@ function grid_gen(grid) {
 
 
 
-function changeTurn() {
-  turn *= -1;
-  shellFired = false;
-  // do some shtuff to hide the current screen, then ask for the other user's password, then reveal screen
-  if (turn == 1) {
-    draw_grid(loc_p1_grid);
-    loc_p1_grid[prevActive[0]][prevActive[1]].resetColour();
-  } else {
-    draw_grid(loc_p2_grid);
-    loc_p2_grid[prevActive[0]][prevActive[1]].resetColour();
-  }
-  console.log("turn changed: "+turn);
-}
-
-
-
-
-
-
-
 function initGame() {
   player_1 = new Player(1);
   player_2 = new Player(-1);
@@ -340,6 +353,34 @@ function initGame() {
 }
 
 
+
+
+
+///////////////////////////////////////////   turn swapping   ///////////////////////////////////////////
+
+
+
+
+
+function changeTurn() {
+  turn *= -1;
+  shellFired = false;
+  // do some shtuff to hide the current screen, then ask for the other user's password, then reveal screen
+  // changes displayed grid, resets all to default colours
+  if (turn == 1) {
+    draw_grid(tgt_p1_grid);
+    tgt_p1_grid[prevActive[0]][prevActive[1]].resetColour();
+    document.getElementById("turn").innerHTML = player_1.username+"'s turn";
+  } else {
+    draw_grid(tgt_p2_grid);
+    tgt_p2_grid[prevActive[0]][prevActive[1]].resetColour();
+    document.getElementById("turn").innerHTML = player_2.username+"'s turn";
+  }
+  console.log("turn changed: "+turn);
+}
+
+
+
 function drawShip(grid, ship) {
   // console.log(ship);
   for (let i = 0; i < ship.length; i++) {
@@ -347,20 +388,13 @@ function drawShip(grid, ship) {
   }
 }
 
-function placeShip(gridP1, gridP2, ship) {
-  // a_s defining which ship is being placed currently
-  a_s++;
-  for (let i = 0; i < ship.length; i++) {
-    gridP1[ship[i][0]][ship[i][1]].hasShip = true;
-    gridP2[ship[i][0]][ship[i][1]+12].hasShip = true;
-  }
 
-  if (a_s > 4) {
-    a_s = 0;
-    if (turn == -1) {placeShips = false}
-    changeTurn();
-  }
-}
+
+
+
+
+
+///////////////////////////////////////////   error checking when placing ships   ///////////////////////////////////////////
 
 
 
@@ -392,6 +426,13 @@ function flashy(coords, grid) {
   timer++;
   if (timer > 6) {clearInterval(flashyInterval())}
 } // meant to be used to flash location when the ship can't go there, doesn't work at the moment
+
+
+
+
+
+///////////////////////////////////////////   placing ships during game setup   ///////////////////////////////////////////
+
 
 
 
@@ -465,24 +506,16 @@ function placing_ships(player, grid, keyCode) {
     tgt_y = 0;
 
     if (turn == 1) {
-      placeShip(loc_p1_grid, loc_p2_grid, player.ships[a_s].loc);
-      drawShip(loc_p1_grid, player_1.ships[a_s].loc)
+      placeShip(tgt_p1_grid, tgt_p2_grid, player.ships[a_s].loc);
+      drawShip(tgt_p1_grid, player_1.ships[a_s].loc)
     }
     else {
-      placeShip(loc_p2_grid, loc_p1_grid, player.ships[a_s].loc)
-      drawShip(loc_p2_grid, player_2.ships[a_s].loc)
+      placeShip(tgt_p2_grid, tgt_p1_grid, player.ships[a_s].loc)
+      drawShip(tgt_p2_grid, player_2.ships[a_s].loc)
     }
   } // confirm // SPACE, ENTER, NUMPAD_ENTER
 }
 
-
-function drawNewShip(grid, player, i) {
-  if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
-  } else {
-    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
-  }
-}
 
 
 function moveShip(grid, player, shpLng, c,p) {
@@ -521,6 +554,38 @@ function rotateShip(grid, player, shpLng, p) {
 
 
 
+function drawNewShip(grid, player, i) {
+  if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
+    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = [151,95,150];
+  } else {
+    grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].colour = ["gray"];
+  }
+}
+
+
+
+function placeShip(gridP1, gridP2, ship) {
+  // a_s defining which ship is being placed currently
+  a_s++;
+  for (let i = 0; i < ship.length; i++) {
+    gridP1[ship[i][0]][ship[i][1]].hasShip = true;
+    gridP2[ship[i][0]][ship[i][1]+12].hasShip = true;
+  }
+
+  if (a_s > 4) {
+    a_s = 0;
+    if (turn == -1) {placeShips = false}
+    changeTurn();
+  }
+}
+
+
+
+
+
+///////////////////////////////////////////   during main game   ///////////////////////////////////////////
+
+
 
 function markTile(grid, y, x) {
   grid[prevActive[0]][prevActive[1]].resetColour();
@@ -557,7 +622,6 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   grid_p2[y][x-12].beenHit = true;
   hitShip(p2, [y,x-12]);
   p1.shots_fired++;
-  // console.log(loc_p1_grid[y][x], y, x)
   grid_p1[y][x].resetColour();
 
   if (grid_p1[y][x].hasShip == true) {
@@ -574,7 +638,13 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
 }
 
+
+
+
+
 ///////////////////////////////////////////   Event Functions   ///////////////////////////////////////////
+
+
 
 
 
@@ -589,9 +659,9 @@ function keyPressed() {
   if (placeShips) {
 
     if (turn == 1) {
-      placing_ships(player_1, loc_p1_grid, keyCode)
+      placing_ships(player_1, tgt_p1_grid, keyCode)
     } else if (turn == -1){
-      placing_ships(player_2, loc_p2_grid, keyCode)
+      placing_ships(player_2, tgt_p2_grid, keyCode)
     }
 
   }
@@ -605,7 +675,7 @@ function keyPressed() {
 
 
 function mousePressed(event) {
-  if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
+  // if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
 
   let tileX = CVS_WIDTH / COLS;
   let tileY = CVS_HEIGHT / ROWS;
@@ -615,17 +685,17 @@ function mousePressed(event) {
 
   if (turn == 1) {
     if (event.button === 2 && activeX > 11) {
-      markTile(loc_p1_grid, activeY, activeX);
+      markTile(tgt_p1_grid, activeY, activeX);
     } else if (event.button === 0) {
-      fireAtCoords(loc_p1_grid, loc_p2_grid, player_1, player_2, activeY, activeX);
+      fireAtCoords(tgt_p1_grid, tgt_p2_grid, player_1, player_2, activeY, activeX);
     // console.log("shoot:", activeY, activeX);
     }
 
   } else if (turn == -1) {
     if (event.button === 2 && activeX > 11) {
-      markTile(loc_p2_grid, activeY, activeX);
+      markTile(tgt_p2_grid, activeY, activeX);
     } else if (event.button === 0) {
-      fireAtCoords(loc_p2_grid, loc_p1_grid, player_2, player_1, activeY, activeX);
+      fireAtCoords(tgt_p2_grid, tgt_p1_grid, player_2, player_1, activeY, activeX);
     // console.log("shoot:", activeY, activeX);
     }
 
