@@ -59,6 +59,7 @@ let pswd_div = document.getElementById("password_div");
 
 
 
+
 ///////////////////////////////////////////   booleans   ///////////////////////////////////////////
 
 
@@ -123,7 +124,7 @@ class Player {
   hits = 0;
   ships_left = 5;
   shots_fired = 0;
-  #password = "cheese";
+  #password = "asdf";
 
   #ships = [];
 
@@ -243,7 +244,6 @@ function setup() {
   grid_gen(tgt_p1_grid);
   grid_gen(tgt_p2_grid);
 
-  pswd_div.style.display = "none"
 
   initGame();
 }
@@ -372,7 +372,7 @@ function finishTurn() {
   shellFired = false;
 
 
-  grid_div.style.display = "none";
+  // grid_div.style.display = "none";
   pswd_div.style.display = "block";
 
 
@@ -395,16 +395,19 @@ function preparePlayer(player, grid) {
 }
 
 
-function password() {
+function password(player) {
+
+
   if (turn == 1) {
-    let player = player_1;
+    player = player_1;
   }
   if (turn == -1) {
-    let player = player_2;
+    player = player_2;
   }
-  // console.log(document.getElementById("pswdBox").innerHTML);
+  console.log(document.getElementById("pswdBox").value);
 
-  // if (player.passwordChecker(document.getElementById("pswdBox") == true)) {
+  // if (player.passwordChecker(document.getElementById("pswdBox").value) == true) {
+  //   document.getElementById("pswdBox").value = "";
   //   console.log("DING DING DING");
   //   grid_div.style.display = "block";
   //   pswd_div.style.display = "none";
