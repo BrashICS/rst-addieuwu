@@ -49,13 +49,13 @@ let a_s = 0; // short for activeShip, changed to a_s because activeShip was a bu
 
 let tgt_p1_grid = []; // grid for player 1
 let tgt_p2_grid = []; // grid for player 2
-let prevActive = [0,0];
-
+let prevActive = [0,0]; // previous active tile, used for highlighting ability on targeting grid
 
 let player_1;
 let player_2;
 
-
+let grid_div = document.getElementById("tgt_cvs_div");
+let pswd_div = document.getElementById("password_div");
 
 
 
@@ -123,7 +123,7 @@ class Player {
   hits = 0;
   ships_left = 5;
   shots_fired = 0;
-  #password = "";
+  #password = "cheese";
 
   #ships = [];
 
@@ -151,11 +151,13 @@ class Player {
 
   }
 
-  get username() {return this.#username}
-  set username(item) {this.#username = item}
-
-  set setPassword(item) {this.#password = item}
   get ships() {return this.#ships}
+  get username() {return this.#username}
+
+  set username(item) {this.#username = item}
+  set password(item) {this.#password = item}
+
+  passwordChecker(pswd) {return pswd == this.#password}
 }
 
 
@@ -241,6 +243,7 @@ function setup() {
   grid_gen(tgt_p1_grid);
   grid_gen(tgt_p2_grid);
 
+  pswd_div.style.display = "none"
 
   initGame();
 }
@@ -363,40 +366,60 @@ function initGame() {
 
 
 
-function changeTurn() {
+function finishTurn() {
+  // begins changing turn sequence
   turn *= -1;
   shellFired = false;
-  // do some shtuff to hide the current screen, then ask for the other user's password, then reveal screen
-  // changes displayed grid, resets all to default colours
 
-  let grid_div = document.getElementById("tgt_cvs_div");
-  let pswd_div = document.getElementById("password_div");
+
   grid_div.style.display = "none";
   pswd_div.style.display = "block";
 
 
   if (turn == 1) {
-    password(player_1);
-    draw_grid(tgt_p1_grid);
-    tgt_p1_grid[prevActive[0]][prevActive[1]].resetColour();
-    document.getElementById("turn").innerHTML = player_1.username+"'s turn";
+    preparePlayer(player_1, tgt_p1_grid)
   } else {
-    password(player_2);
-    draw_grid(tgt_p2_grid);
-    tgt_p2_grid[prevActive[0]][prevActive[1]].resetColour();
-    document.getElementById("turn").innerHTML = player_2.username+"'s turn";
+    preparePlayer(player_2, tgt_p2_grid)
   }
-  grid_div.style.display = "block";
   console.log("turn changed: "+turn);
 }
 
 
 
-function password(player) {
-  if(document.getElementById("pswdBox") != player.password) {
-    return -1;
-  }
+
+function preparePlayer(player, grid) {
+  draw_grid(grid);
+  grid[prevActive[0]][prevActive[1]].resetColour();
+  document.getElementById("turn").innerHTML = player.username+"'s turn";
+  pswdBoxTxt.innerHTML = player.username+", please enter your password to reveal your screen."
 }
+
+
+function password() {
+  if (turn == 1) {
+    let player = player_1;
+  }
+  if (turn == -1) {
+    let player = player_2;
+  }
+  // console.log(document.getElementById("pswdBox").innerHTML);
+
+  // if (player.passwordChecker(document.getElementById("pswdBox") == true)) {
+  //   console.log("DING DING DING");
+  //   grid_div.style.display = "block";
+  //   pswd_div.style.display = "none";
+  // } else {
+  //   console.log("LOUD INCORRECT BUZZER")
+  // }
+}
+
+
+
+
+function changeTurn() {
+
+}
+
 
 
 
@@ -595,7 +618,7 @@ function placeShip(gridP1, gridP2, ship) {
   if (a_s > 4) {
     a_s = 0;
     if (turn == -1) {placeShips = false}
-    changeTurn();
+    finishTurn();
   }
 }
 
@@ -653,8 +676,8 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   }
 
   // wait for a few seconds before switching turn
-  // setTimeout(changeTurn(), 5000); // doesn't want to work, not sure why and i'm pretty sure i'm using it correctly so i'm just not gonna use it
-  // changeTurn();
+  // setTimeout(finishTurn(), 5000); // doesn't want to work, not sure why and i'm pretty sure i'm using it correctly so i'm just not gonna use it
+  // finishTurn();
 
 }
 
@@ -688,7 +711,7 @@ function keyPressed() {
 
   // /*
   if (keyCode === 16 || keyCode === 18) {
-    changeTurn();
+    finishTurn();
   } // just for testing so i can hotswap player turns
   // */
 }

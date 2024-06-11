@@ -13,17 +13,17 @@
 <body>
 
     <div id="changeTurnDiv">
-        <button id="chgTrnBtn" onclick="changeTurn()">I'm Done My Turn</button>
+        <button id="chgTrnBtn" onclick="finishTurn()">I'm Done My Turn</button>
         <span id="turn"></span>
     </div>
 
     <div id="tgt_cvs_div">
     </div>
-    <div id="password_div" onsubmit="password()">
-        <label for="pswdBox" id="pswdBoxTxt">Player 1, please enter your password to reveal your screen.</label>
+    <form id="password_div" onsubmit="password()">
+        <label for="pswdBox" id="pswdBoxTxt">Please enter your password to reveal your screen.</label>
         <input type="password" id="pswdBox">
         <input type="submit" value="Confirm">
-    </div>
+    </form>
 
 
 
