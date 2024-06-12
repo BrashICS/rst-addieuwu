@@ -69,6 +69,7 @@ let pswd_div = document.getElementById("password_div");
 let shellFired = false;
 let turn = 1; // between 1 and -1
 let placeShips = true;
+let playerSetup = true;
 
 
 
@@ -386,7 +387,7 @@ function playerCreation() {
 
     grid_div.style.display = "block"
 
-
+    playerSetup = false;
   }
 
 
@@ -396,6 +397,7 @@ function playerCreation() {
 
 
 function finishTurn() {
+  if (shellFired == false && placeShips == false) {return -1}
   // begins changing turn sequence
   turn *= -1;
   shellFired = false;
@@ -415,13 +417,13 @@ function finishTurn() {
 
 
 
-
 function preparePlayer(player, grid) {
   draw_grid(grid);
   grid[prevActive[0]][prevActive[1]].resetColour();
   document.getElementById("turn").innerHTML = player.username+"'s turn";
   pswdBoxTxt.innerHTML = player.username+", please enter your password to reveal your screen."
 }
+
 
 
 function password(player) {
@@ -700,10 +702,10 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   grid_p1[y][x].resetColour();
 
   if (grid_p1[y][x].hasShip == true) {
-    // console.log("HIT");
+    console.log("HIT");
     // grid_p1[y][x].colour = "red";
   } else {
-    // console.log("MISS");
+    console.log("MISS");
     // grid_p1[y][x].colour = "white";
   }
 
@@ -730,7 +732,7 @@ function keyPressed() {
   // i'm very confident that this is actually very bad practice and probably brings a lot of issues with it
   // but i don't know how else to pass player_1 or player_2 to this function when it's their turn and this seems to work entirely because JS copies by reference instead of value
   // i genuinely never thought my life would actually be easier because of something i despise so much
-
+  if (playerSetup == true) {return -1}
   if (placeShips) {
 
     if (turn == 1) {
@@ -741,41 +743,44 @@ function keyPressed() {
 
   }
 
-  /*
-  if (keyCode === 16 || keyCode === 18) {
+  // /*
+  if (keyCode === 18) {
     finishTurn();
   } // just for testing so i can hotswap player turns
-  */
+  // */
 }
 
 
 function mousePressed(event) {
-  // if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
+  if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
 
   let tileX = CVS_WIDTH / COLS;
   let tileY = CVS_HEIGHT / ROWS;
   let activeX = (mouseX - (mouseX % tileX)) / tileX;
   let activeY = (mouseY - (mouseY % tileY)) / tileY;
+  console.log(activeY, activeX)
   // i have this code up in draw_grid so i could probably just make a helper function so i dont need the code twice but whatever lol
 
-  if (turn == 1) {
-    if (event.button === 2 && activeX > 11) {
-      markTile(tgt_p1_grid, activeY, activeX);
-    } else if (event.button === 0) {
-      fireAtCoords(tgt_p1_grid, tgt_p2_grid, player_1, player_2, activeY, activeX);
-    // console.log("shoot:", activeY, activeX);
-    }
 
-  } else if (turn == -1) {
-    if (event.button === 2 && activeX > 11) {
-      markTile(tgt_p2_grid, activeY, activeX);
-    } else if (event.button === 0) {
-      fireAtCoords(tgt_p2_grid, tgt_p1_grid, player_2, player_1, activeY, activeX);
-    // console.log("shoot:", activeY, activeX);
-    }
+  if (activeX > 11 && activeX < 20 && activeY >= 0 && activeY < 10) {
+    if (turn == 1) {
+      if (event.button === 2) {
+        markTile(tgt_p1_grid, activeY, activeX);
+      } else if (event.button === 0) {
+        fireAtCoords(tgt_p1_grid, tgt_p2_grid, player_1, player_2, activeY, activeX);
+      // console.log("shoot:", activeY, activeX);
+      }
 
+    } else if (turn == -1) {
+      if (event.button === 2) {
+        markTile(tgt_p2_grid, activeY, activeX);
+      } else if (event.button === 0) {
+        fireAtCoords(tgt_p2_grid, tgt_p1_grid, player_2, player_1, activeY, activeX);
+      // console.log("shoot:", activeY, activeX);
+      }
+
+    }
   }
-
 }
 
 
