@@ -349,11 +349,6 @@ function initGame() {
   player_1.username = "USN";
   player_2.username = "IJN";
 
-
-  // drawShip(player_1.ships[a_s].loc);
-
-  // shipPlacement(player_1);w
-  // shipPlacement(player_2);
 }
 
 
@@ -366,13 +361,47 @@ function initGame() {
 
 
 
+function playerCreation() {
+  turn *=-1
+
+  if (turn == -1) { // -1 instead of 1 because i changed the turn before doing action so technically it's still player 1's turn
+    player_1.username = document.getElementById("user_box").value
+    player_1.password = document.getElementById("pswd_box").value
+
+    document.getElementById("user_box").value = ""
+    document.getElementById("pswd_box").value = ""
+
+    document.getElementById("turn").innerHTML = "Player 2, enter a username."
+  } else {
+    player_2.username = document.getElementById("user_box").value
+    player_2.password = document.getElementById("pswd_box").value
+
+    document.getElementById("user_box").value = ""
+    document.getElementById("pswd_box").value = ""
+
+    document.getElementById("turn").innerHTML = player_1.username+"'s turn"
+
+    document.getElementById("chgTrnBtn").style.display = "block"
+    document.getElementById("player_init").style.display = "none"
+
+    grid_div.style.display = "block"
+
+
+  }
+
+
+
+}
+
+
+
 function finishTurn() {
   // begins changing turn sequence
   turn *= -1;
   shellFired = false;
 
 
-  // grid_div.style.display = "none";
+  grid_div.style.display = "none";
   pswd_div.style.display = "block";
 
 
@@ -396,7 +425,7 @@ function preparePlayer(player, grid) {
 
 
 function password(player) {
-
+  let input_password = document.getElementById("password").value;
 
   if (turn == 1) {
     player = player_1;
@@ -404,16 +433,16 @@ function password(player) {
   if (turn == -1) {
     player = player_2;
   }
-  console.log(document.getElementById("pswdBox").value);
+  console.log();
 
-  // if (player.passwordChecker(document.getElementById("pswdBox").value) == true) {
-  //   document.getElementById("pswdBox").value = "";
-  //   console.log("DING DING DING");
-  //   grid_div.style.display = "block";
-  //   pswd_div.style.display = "none";
-  // } else {
-  //   console.log("LOUD INCORRECT BUZZER")
-  // }
+  if (player.passwordChecker(input_password) == true) {
+    document.getElementById("password").value = "";
+    console.log("DING DING DING");
+    grid_div.style.display = "block";
+    pswd_div.style.display = "none";
+  } else {
+    console.log("LOUD INCORRECT BUZZER")
+  }
 }
 
 
@@ -712,11 +741,11 @@ function keyPressed() {
 
   }
 
-  // /*
+  /*
   if (keyCode === 16 || keyCode === 18) {
     finishTurn();
   } // just for testing so i can hotswap player turns
-  // */
+  */
 }
 
 
