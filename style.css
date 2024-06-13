@@ -15,3 +15,7 @@ body {
 #chgTrnBtn {
     display: none;
 }
+
+#changeView {
+    display: none;
+}

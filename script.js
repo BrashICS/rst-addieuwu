@@ -68,8 +68,10 @@ let pswd_div = document.getElementById("password_div");
 
 let shellFired = false;
 let turn = 1; // between 1 and -1
-let placeShips = true;
-let playerSetup = true;
+let placeShips = true; // prevents ships from being moved when the initial two turns are over
+let playerSetup = true; // prevents ships from being moved before the players have usernames and passwords
+let betweenTurns = false; // prevents accidental clicks during turn change
+let gaming = true;
 
 
 
@@ -397,6 +399,7 @@ function playerCreation() {
 
 
 function finishTurn() {
+  betweenTurns = true;
   if (shellFired == false && placeShips == false) {return -1}
   // begins changing turn sequence
   turn *= -1;
@@ -435,25 +438,17 @@ function password(player) {
   if (turn == -1) {
     player = player_2;
   }
-  console.log();
 
   if (player.passwordChecker(input_password) == true) {
     document.getElementById("password").value = "";
     console.log("DING DING DING");
     grid_div.style.display = "block";
     pswd_div.style.display = "none";
+    betweenTurns = false;
   } else {
     console.log("LOUD INCORRECT BUZZER")
   }
 }
-
-
-
-
-function changeTurn() {
-
-}
-
 
 
 
@@ -643,6 +638,7 @@ function drawNewShip(grid, player, i) {
 
 function placeShip(gridP1, gridP2, ship) {
   // a_s defining which ship is being placed currently
+  // console.log(placeShips, shellFired);
   a_s++;
   for (let i = 0; i < ship.length; i++) {
     gridP1[ship[i][0]][ship[i][1]].hasShip = true;
@@ -651,8 +647,8 @@ function placeShip(gridP1, gridP2, ship) {
 
   if (a_s > 4) {
     a_s = 0;
-    if (turn == -1) {placeShips = false}
     finishTurn();
+    if (turn == 1) {placeShips = false} // stops players from moving ships after the initial two turns are set up
   }
 }
 
@@ -678,9 +674,14 @@ function hitShip(player, coords) {
       // console.log(player.ships[q].loc, coords)
       if (player.ships[q].loc[r][0] == coords[0] && player.ships[q].loc[r][1] == coords[1]) {
         player.ships[q].loc[r][2] = true;
-        if (player.ships[q].stillAlive() == false) {player.ships_left--}
-        console.log(player.ships[q].loc[r]);
-        console.log(player.ships_left);
+        if (player.ships[q].stillAlive() == false) {
+          player.ships_left--
+          if (player.ships_left < 1) {
+            gameOver(player);
+          }
+        }
+        // console.log(player.ships[q].loc[r]);
+        // console.log(player.ships_left);
         return;
       }
     } // finds which part of which ship was hit, then lets the ship know it was shot there
@@ -689,11 +690,16 @@ function hitShip(player, coords) {
 }
 
 
+
 function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
+  if (gaming = false) {return -1} // checking if the game is over
+  if (betweenTurns) {return -1} // checking if the player is allowed to shoot
+  if (placeShips) {return -1} // checking if the ships are being placed
   if (shellFired) {return -1} // checking if the player has already shot this turn
   if (x <= 11) {return -1} // checking if the mouse was clicked on the targeting grid
   if (grid_p1[y][x].beenHit) {return -1} // checking if the tile was already shot at
-  // console.log("SHELL FIRED");
+  // yes there's a lot of error checking. my ships became sentient and started shooting at each other (clicks on buttons were registering on the targeting grid) so i had to put all these safeties in place to prevent an AI uprising
+  console.log("SHELL FIRED");
   shellFired = true;
   grid_p1[y][x].beenHit = true;
   grid_p2[y][x-12].beenHit = true;
@@ -703,16 +709,40 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
   if (grid_p1[y][x].hasShip == true) {
     console.log("HIT");
-    // grid_p1[y][x].colour = "red";
   } else {
     console.log("MISS");
-    // grid_p1[y][x].colour = "white";
   }
+}
 
-  // wait for a few seconds before switching turn
-  // setTimeout(finishTurn(), 5000); // doesn't want to work, not sure why and i'm pretty sure i'm using it correctly so i'm just not gonna use it
-  // finishTurn();
 
+
+
+
+///////////////////////////////////////////   Game Over   ///////////////////////////////////////////
+
+
+
+
+
+function gameOver(player) {
+  console.log("Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+(player.shots_fired / player.hits)+"%.");
+  betweenTurns = true;
+  gaming = false;
+  document.getElementById("turn").innerHTML = "Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+(player.shots_fired / player.hits)+"%."
+  document.getElementById("chgTrnBtn").style.display = "none";
+  document.getElementById("changeView").style.display = "block";
+}
+
+
+
+function swapScreen() {
+  grid_div.style.display = "block";
+  pswd_div.style.display = "none";
+  if (turn == 1) {
+    draw_grid(tgt_p1_grid);
+  } else if (turn == -1) {
+    draw_grid(tgt_p2_grid);
+  }
 }
 
 
@@ -726,12 +756,7 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
 
 function keyPressed() {
-  // console.log(player_1.ships[a_s].length)
-
-  // console.log(player.ships[a_s].loc);
-  // i'm very confident that this is actually very bad practice and probably brings a lot of issues with it
-  // but i don't know how else to pass player_1 or player_2 to this function when it's their turn and this seems to work entirely because JS copies by reference instead of value
-  // i genuinely never thought my life would actually be easier because of something i despise so much
+  if (gaming == false) {return -1} // checking if game is over
   if (playerSetup == true) {return -1}
   if (placeShips) {
 
@@ -743,32 +768,33 @@ function keyPressed() {
 
   }
 
-  // /*
+  /*
   if (keyCode === 18) {
     finishTurn();
   } // just for testing so i can hotswap player turns
-  // */
+  */
 }
 
 
 function mousePressed(event) {
-  if (placeShips == true) {return -1} // returns if ships are being placed, prevents shooting while moving into position
+  if (gaming == false) {return -1} // checking if game is over
+  if (placeShips == true) {return -1} // prevents shooting while moving into position
 
   let tileX = CVS_WIDTH / COLS;
   let tileY = CVS_HEIGHT / ROWS;
   let activeX = (mouseX - (mouseX % tileX)) / tileX;
   let activeY = (mouseY - (mouseY % tileY)) / tileY;
-  console.log(activeY, activeX)
+  // console.log(activeY, activeX)
   // i have this code up in draw_grid so i could probably just make a helper function so i dont need the code twice but whatever lol
 
 
-  if (activeX > 11 && activeX < 20 && activeY >= 0 && activeY < 10) {
+  if (activeX > 11 && activeX < 22 && activeY >= 0 && activeY < 10) {
     if (turn == 1) {
       if (event.button === 2) {
         markTile(tgt_p1_grid, activeY, activeX);
       } else if (event.button === 0) {
         fireAtCoords(tgt_p1_grid, tgt_p2_grid, player_1, player_2, activeY, activeX);
-      // console.log("shoot:", activeY, activeX);
+        console.log("shoot:", activeY, activeX);
       }
 
     } else if (turn == -1) {
@@ -776,7 +802,7 @@ function mousePressed(event) {
         markTile(tgt_p2_grid, activeY, activeX);
       } else if (event.button === 0) {
         fireAtCoords(tgt_p2_grid, tgt_p1_grid, player_2, player_1, activeY, activeX);
-      // console.log("shoot:", activeY, activeX);
+        console.log("shoot:", activeY, activeX);
       }
 
     }
