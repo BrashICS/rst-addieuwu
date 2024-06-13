@@ -442,9 +442,10 @@ function password(player) {
   if (player.passwordChecker(input_password) == true) {
     document.getElementById("password").value = "";
     console.log("DING DING DING");
+    betweenTurns = false;
     grid_div.style.display = "block";
     pswd_div.style.display = "none";
-    betweenTurns = false;
+
   } else {
     console.log("LOUD INCORRECT BUZZER")
   }
@@ -674,6 +675,7 @@ function hitShip(player, coords) {
       // console.log(player.ships[q].loc, coords)
       if (player.ships[q].loc[r][0] == coords[0] && player.ships[q].loc[r][1] == coords[1]) {
         player.ships[q].loc[r][2] = true;
+        player.hits++;
         if (player.ships[q].stillAlive() == false) {
           player.ships_left--
           if (player.ships_left < 1) {
@@ -692,19 +694,22 @@ function hitShip(player, coords) {
 
 
 function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
-  if (gaming = false) {return -1} // checking if the game is over
+  console.log("All must be false except for the first")
+  console.log(gaming, betweenTurns, placeShips, shellFired, grid_p1[y][x].beenHit)
+  if (gaming == false) {return -1} // checking if the game is over
   if (betweenTurns) {return -1} // checking if the player is allowed to shoot
   if (placeShips) {return -1} // checking if the ships are being placed
   if (shellFired) {return -1} // checking if the player has already shot this turn
   if (x <= 11) {return -1} // checking if the mouse was clicked on the targeting grid
   if (grid_p1[y][x].beenHit) {return -1} // checking if the tile was already shot at
   // yes there's a lot of error checking. my ships became sentient and started shooting at each other (clicks on buttons were registering on the targeting grid) so i had to put all these safeties in place to prevent an AI uprising
+  p1.shots_fired++;
   console.log("SHELL FIRED");
   shellFired = true;
   grid_p1[y][x].beenHit = true;
   grid_p2[y][x-12].beenHit = true;
   hitShip(p2, [y,x-12]);
-  p1.shots_fired++;
+
   grid_p1[y][x].resetColour();
 
   if (grid_p1[y][x].hasShip == true) {
@@ -725,10 +730,11 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
 
 function gameOver(player) {
-  console.log("Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+(player.shots_fired / player.hits)+"%.");
+  console.log(player.shots_fired, player.hits)
+  console.log("Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired)+"%.");
   betweenTurns = true;
   gaming = false;
-  document.getElementById("turn").innerHTML = "Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+(player.shots_fired / player.hits)+"%."
+  document.getElementById("turn").innerHTML = "Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired*100)+"%."
   document.getElementById("chgTrnBtn").style.display = "none";
   document.getElementById("changeView").style.display = "block";
 }
@@ -736,6 +742,7 @@ function gameOver(player) {
 
 
 function swapScreen() {
+  turn *= -1;
   grid_div.style.display = "block";
   pswd_div.style.display = "none";
   if (turn == 1) {
@@ -766,6 +773,10 @@ function keyPressed() {
       placing_ships(player_2, tgt_p2_grid, keyCode)
     }
 
+  } else {
+    if (keyCode === 32 || keyCode === 13) {
+      finishTurn();
+    }
   }
 
   /*
