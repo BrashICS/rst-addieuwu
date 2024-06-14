@@ -50,13 +50,17 @@ let a_s = 0; // short for activeShip, changed to a_s because activeShip was a bu
 let tgt_p1_grid = []; // grid for player 1
 let tgt_p2_grid = []; // grid for player 2
 let prevActive = [0,0]; // previous active tile, used for highlighting ability on targeting grid
+let coords_tgt = [0,0];
 
 let player_1;
 let player_2;
 
-let grid_div = document.getElementById("tgt_cvs_div");
-let pswd_div = document.getElementById("password_div");
-
+let grid_div = document.getElementById("tgt_cvs_div"); // container for canvas
+let pswd_div = document.getElementById("password_div"); // container for password box
+let dmg_rpt = document.getElementById("damage_report"); // text for alerts when you're shot somewhere
+let srk_rpt = document.getElementById("strike_report"); // text for alerts when you've sunk a ship
+let cic_dmg_rpt = document.getElementById("cic_damage_report"); // container for dmg_rpt
+let cic_srk_rpt = document.getElementById("cic_strike_report"); // container for srk_rpt
 
 
 
@@ -408,12 +412,14 @@ function finishTurn() {
 
   grid_div.style.display = "none";
   pswd_div.style.display = "block";
+  cic_dmg_rpt.style.display = "none";
+  cic_srk_rpt.style.display = "none";
 
 
   if (turn == 1) {
-    preparePlayer(player_1, tgt_p1_grid)
+    preparePlayer(player_1, tgt_p1_grid);
   } else {
-    preparePlayer(player_2, tgt_p2_grid)
+    preparePlayer(player_2, tgt_p2_grid);
   }
   console.log("turn changed: "+turn);
 }
@@ -424,7 +430,7 @@ function preparePlayer(player, grid) {
   draw_grid(grid);
   grid[prevActive[0]][prevActive[1]].resetColour();
   document.getElementById("turn").innerHTML = player.username+"'s turn";
-  pswdBoxTxt.innerHTML = player.username+", please enter your password to reveal your screen."
+  pswdBoxTxt.innerHTML = player.username+", please enter your password to reveal your screen.";
 }
 
 
@@ -445,10 +451,21 @@ function password(player) {
     betweenTurns = false;
     grid_div.style.display = "block";
     pswd_div.style.display = "none";
+    if (placeShips == false) {
+      dmg_rpt.style.display = "inline-block";
+    }
+
 
   } else {
     console.log("LOUD INCORRECT BUZZER")
   }
+}
+
+
+
+function close_cic_rpt() {
+  cic_dmg_rpt.style.display = "none";
+  cic_srk_rpt.style.display = "none";
 }
 
 
@@ -676,11 +693,10 @@ function hitShip(player, coords) {
       if (player.ships[q].loc[r][0] == coords[0] && player.ships[q].loc[r][1] == coords[1]) {
         player.ships[q].loc[r][2] = true;
         player.hits++;
+        dmg_rpt.innerHTML = "Your ship, the "+player.ships[q].type, player.ships[q].name+", was hit by enemy fire at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+"."
         if (player.ships[q].stillAlive() == false) {
-          player.ships_left--
-          if (player.ships_left < 1) {
-            gameOver(player);
-          }
+          shipDestroyed(player, q);
+
         }
         // console.log(player.ships[q].loc[r]);
         // console.log(player.ships_left);
@@ -689,6 +705,19 @@ function hitShip(player, coords) {
     } // finds which part of which ship was hit, then lets the ship know it was shot there
   }
 
+}
+
+
+
+function shipDestroyed(player, q) {
+  dmg_rpt.innerHTML = "Your ship, the "+player.ships[q].type, player.ships[q].name+", has sunk from enemy fire at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+".";
+  srk_rpt.innerHTML = "You have sunk the "+player.ships[q].type, player.ships[q].name+" at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+"."
+  cic_srk_rpt.style.display = "inline-block";
+  player.ships_left--;
+  console.log("BANG")
+  if (player.ships_left < 1) {
+    gameOver(player);
+  }
 }
 
 
@@ -706,6 +735,7 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   p1.shots_fired++;
   console.log("SHELL FIRED");
   shellFired = true;
+  coords_tgt = [y,x-12];
   grid_p1[y][x].beenHit = true;
   grid_p2[y][x-12].beenHit = true;
   hitShip(p2, [y,x-12]);
@@ -732,7 +762,6 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 function gameOver(player) {
   console.log(player.shots_fired, player.hits)
   console.log("Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired)+"%.");
-  betweenTurns = true;
   gaming = false;
   document.getElementById("turn").innerHTML = "Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired*100)+"%."
   document.getElementById("chgTrnBtn").style.display = "none";
@@ -764,6 +793,7 @@ function swapScreen() {
 
 function keyPressed() {
   if (gaming == false) {return -1} // checking if game is over
+  if (betweenTurns == true) {return -1}
   if (playerSetup == true) {return -1}
   if (placeShips) {
 

@@ -19,3 +19,16 @@ body {
 #changeView {
     display: none;
 }
+
+.report {
+    position: absolute;
+    display: none;
+    width: 65%;
+    text-align: center;
+    background-color: rgba(205,205,205,1);
+    border: 2px solid black;
+    border-radius: 15px;
+    margin: auto;
+    padding: 30px;
+}
+
