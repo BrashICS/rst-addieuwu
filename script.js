@@ -228,6 +228,8 @@ class Compartment {
   get damaged() {return this.#damaged}
   set damaged(item) {this.#damaged = item}
 }
+// honestly i don't remember if i used this object AT ALL. i'm pretty sure i could delete this whole block and the code would run just fine but i really don't want to risk it and spend three hours of valuable time trying to find where it was used just so i can spend another two hours trying to figure out another solution
+// plus it has bingus and we like bingus so it gets to stay
 
 
 
@@ -426,7 +428,7 @@ function finishTurn() {
   } else {
     preparePlayer(player_2, tgt_p2_grid);
   }
-  console.log("turn changed: "+turn);
+  // console.log("turn changed: "+turn);
 }
 
 
@@ -452,7 +454,7 @@ function password(player) {
 
   if (player.passwordChecker(input_password) == true) {
     document.getElementById("password").value = "";
-    console.log("DING DING DING");
+    // console.log("DING DING DING");
     betweenTurns = false;
     grid_div.style.display = "block";
     pswd_div.style.display = "none";
@@ -463,7 +465,7 @@ function password(player) {
 
 
   } else {
-    console.log("LOUD INCORRECT BUZZER")
+    // console.log("LOUD INCORRECT BUZZER")
   }
 }
 
@@ -586,14 +588,14 @@ function placing_ships(player, grid, keyCode) {
 
 
   if (keyCode === 32 || keyCode === 13) {
-    console.log("CONFIRM")
+    // console.log("CONFIRM")
     for (let i = 0; i < shpLng; i++) {
       if (grid[player.ships[a_s].loc[i][0]][player.ships[a_s].loc[i][1]].hasShip == true) {
-        console.log("COLLISION DETECTED");
+        // console.log("COLLISION DETECTED");
         return -1;
       } // prevents two ships from occupying the same coordinate
     }
-    console.log("SHIP PLACED")
+    // console.log("SHIP PLACED")
 
     // resets target coordinates to default values
     tgt_r = -1;
@@ -700,7 +702,7 @@ function hitShip(player, coords) {
         player.ships[q].loc[r][2] = true;
         player.hits++;
         recentlyHit = true;
-        console.log(player.ships[q].type, player.ships[q].name);
+        // console.log(player.ships[q].type, player.ships[q].name);
         dmg_rpt.innerHTML = "Damage control reports that our "+player.ships[q].type+", the "+player.ships[q].name+", was hit by enemy fire at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+".";
         cic_dmg_rpt.style.display = "none"; // hopefully this prevents the damage report from showing up when you hit something, it should still show up when you're hit
         if (player.ships[q].stillAlive() == false) {
@@ -723,7 +725,7 @@ function shipDestroyed(player, q) {
   srk_rpt.innerHTML = "Aerial reconnaissance reports that the "+player.ships[q].type+" "+player.ships[q].name+" has sunk at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+"."
   cic_srk_rpt.style.display = "inline-block";
   player.ships_left--;
-  console.log("BANG")
+  // console.log("BANG");
   if (player.ships_left < 1) {
     gameOver(player, q);
   }
@@ -732,7 +734,7 @@ function shipDestroyed(player, q) {
 
 
 function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
-  console.log(gaming, betweenTurns, placeShips, shellFired, grid_p1[y][x].beenHit)
+  // console.log(gaming, betweenTurns, placeShips, shellFired, grid_p1[y][x].beenHit)
   if (gaming == false) {return -1} // checking if the game is over
   if (betweenTurns) {return -1} // checking if the player is allowed to shoot
   if (placeShips) {return -1} // checking if the ships are being placed
@@ -741,7 +743,7 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   if (grid_p1[y][x].beenHit) {return -1} // checking if the tile was already shot at
   // yes there's a lot of error checking. my ships became sentient and started shooting at each other (clicks on buttons were registering on the targeting grid) so i had to put all these safeties in place to prevent an AI uprising
   p1.shots_fired++;
-  console.log("SHELL FIRED");
+  // console.log("SHELL FIRED");
   shellFired = true;
   coords_tgt = [y,x-12];
   grid_p1[y][x].beenHit = true;
@@ -751,9 +753,9 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
   grid_p1[y][x].resetColour();
 
   if (grid_p1[y][x].hasShip == true) {
-    console.log("HIT");
+    // console.log("HIT");
   } else {
-    console.log("MISS");
+    // console.log("MISS");
   }
 }
 
@@ -768,8 +770,8 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
 
 function gameOver(player, q) {
-  console.log(player.shots_fired, player.hits)
-  console.log("Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired)+"%.");
+  // console.log(player.shots_fired, player.hits)
+  // console.log("Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired)+"%.");
   gaming = false;
   document.getElementById("turn").innerHTML = "Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired*100)+"%."
   document.getElementById("chgTrnBtn").style.display = "none";
@@ -845,7 +847,7 @@ function mousePressed(event) {
         markTile(tgt_p1_grid, activeY, activeX);
       } else if (event.button === 0) {
         fireAtCoords(tgt_p1_grid, tgt_p2_grid, player_1, player_2, activeY, activeX);
-        console.log("shoot:", activeY, activeX);
+        // console.log("shoot:", activeY, activeX);
       }
 
     } else if (turn == -1) {
@@ -853,7 +855,7 @@ function mousePressed(event) {
         markTile(tgt_p2_grid, activeY, activeX);
       } else if (event.button === 0) {
         fireAtCoords(tgt_p2_grid, tgt_p1_grid, player_2, player_1, activeY, activeX);
-        console.log("shoot:", activeY, activeX);
+        // console.log("shoot:", activeY, activeX);
       }
 
     }
