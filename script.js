@@ -178,6 +178,7 @@ class Ship {
   #seaworthy = true; // if ship is still alive
   #coords = []; // coordinates for each section of the ship
   #name; // name of ship, used for text alert when the ship has been destroyed
+  bingus = "bingus"; // bingus
   // #coordinates;
   #rotation;
 
@@ -213,23 +214,6 @@ class Ship {
     return false;
   }
 }
-
-
-
-class Compartment {
-  #coords; // coordinates of compartment on grid
-  bingus = "bingus" // bingus
-  #damaged = false; // boolean if the compartment has recieved a hit
-
-  constructor(coords) {
-    this.#coords = coords
-  }
-
-  get damaged() {return this.#damaged}
-  set damaged(item) {this.#damaged = item}
-}
-// honestly i don't remember if i used this object AT ALL. i'm pretty sure i could delete this whole block and the code would run just fine but i really don't want to risk it and spend three hours of valuable time trying to find where it was used just so i can spend another two hours trying to figure out another solution
-// plus it has bingus and we like bingus so it gets to stay
 
 
 
