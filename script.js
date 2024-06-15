@@ -71,6 +71,7 @@ let cic_srk_rpt = document.getElementById("cic_strike_report"); // container for
 
 
 let shellFired = false;
+let recentlyHit = false; // prevents damage report from unnecessarily appearing
 let turn = 1; // between 1 and -1
 let placeShips = true; // prevents ships from being moved when the initial two turns are over
 let playerSetup = true; // prevents ships from being moved before the players have usernames and passwords
@@ -131,7 +132,7 @@ class Player {
   hits = 0;
   ships_left = 5;
   shots_fired = 0;
-  #password = "asdf";
+  #password = "";
 
   #ships = [];
 
@@ -142,18 +143,20 @@ class Player {
     // ship initialisation
     if (position == 1) {
       // player 1 plays as USA
-      this.#ships[0] = new Ship(5, "ac", "USS Yorktown")
-      this.#ships[1] = new Ship(4, "bt", "USS Missouri")
-      this.#ships[2] = new Ship(3, "ds", "USS Isherwood")
-      this.#ships[3] = new Ship(3, "sb", "USS Barracuda")
-      this.#ships[4] = new Ship(2, "pt", "USS Barfly")
+      this.#username = "United States Navy"
+      this.#ships[0] = new Ship(5, "aircraft carrier", "USS Yorktown")
+      this.#ships[1] = new Ship(4, "battleship", "USS Missouri")
+      this.#ships[2] = new Ship(3, "destroyer", "USS Isherwood")
+      this.#ships[3] = new Ship(3, "submarine", "USS Barracuda")
+      this.#ships[4] = new Ship(2, "patrol boat", "USS Barfly")
     } else {
       // player 2 plays as Imperial Japan
-      this.#ships[0] = new Ship(5, "ac", "IJN Akagi")
-      this.#ships[1] = new Ship(4, "bt", "IJN Yamato")
-      this.#ships[2] = new Ship(3, "ds", "IJN Yukikaze")
-      this.#ships[3] = new Ship(3, "sb", "IJN Kaidai")
-      this.#ships[4] = new Ship(2, "pt", "IJN Ryuuho")
+      this.#username = "Imperial Japanese Navy"
+      this.#ships[0] = new Ship(5, "aircraft carrier", "IJN Akagi")
+      this.#ships[1] = new Ship(4, "battleship", "IJN Yamato")
+      this.#ships[2] = new Ship(3, "destroyer", "IJN Yukikaze")
+      this.#ships[3] = new Ship(3, "submarine", "IJN Kaidai")
+      this.#ships[4] = new Ship(2, "patrol boat", "IJN Ryuuho")
     }
 
 
@@ -192,6 +195,7 @@ class Ship {
   get name() {return this.#name}
   get loc() {return this.#coords} // loc short for location
   // get coordinates() {return this.#coordinates}
+  get type() {return this.#type}
 
   // set coordinates(item) {this.#coordinates = item}
   set rotation(item) {this.#rotation = item}
@@ -353,9 +357,6 @@ function initGame() {
   player_1 = new Player(1);
   player_2 = new Player(-1);
 
-  player_1.username = "USN";
-  player_2.username = "IJN";
-
 }
 
 
@@ -372,7 +373,9 @@ function playerCreation() {
   turn *=-1
 
   if (turn == -1) { // -1 instead of 1 because i changed the turn before doing action so technically it's still player 1's turn
-    player_1.username = document.getElementById("user_box").value
+    if (document.getElementById("user_box").value != ""){
+      player_1.username = document.getElementById("user_box").value
+    } // if no username is given, username defaults to the name of the navy the player plays as
     player_1.password = document.getElementById("pswd_box").value
 
     document.getElementById("user_box").value = ""
@@ -380,7 +383,9 @@ function playerCreation() {
 
     document.getElementById("turn").innerHTML = "Player 2, enter a username."
   } else {
-    player_2.username = document.getElementById("user_box").value
+    if (document.getElementById("user_box").value != ""){
+      player_2.username = document.getElementById("user_box").value
+    }
     player_2.password = document.getElementById("pswd_box").value
 
     document.getElementById("user_box").value = ""
@@ -451,8 +456,9 @@ function password(player) {
     betweenTurns = false;
     grid_div.style.display = "block";
     pswd_div.style.display = "none";
-    if (placeShips == false) {
-      dmg_rpt.style.display = "inline-block";
+    if (placeShips == false && recentlyHit == true) {
+      cic_dmg_rpt.style.display = "inline-block";
+      recentlyHit = false;
     }
 
 
@@ -693,7 +699,10 @@ function hitShip(player, coords) {
       if (player.ships[q].loc[r][0] == coords[0] && player.ships[q].loc[r][1] == coords[1]) {
         player.ships[q].loc[r][2] = true;
         player.hits++;
-        dmg_rpt.innerHTML = "Your ship, the "+player.ships[q].type, player.ships[q].name+", was hit by enemy fire at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+"."
+        recentlyHit = true;
+        console.log(player.ships[q].type, player.ships[q].name);
+        dmg_rpt.innerHTML = "Damage control reports that our "+player.ships[q].type+", the "+player.ships[q].name+", was hit by enemy fire at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+".";
+        cic_dmg_rpt.style.display = "none"; // hopefully this prevents the damage report from showing up when you hit something, it should still show up when you're hit
         if (player.ships[q].stillAlive() == false) {
           shipDestroyed(player, q);
 
@@ -710,20 +719,19 @@ function hitShip(player, coords) {
 
 
 function shipDestroyed(player, q) {
-  dmg_rpt.innerHTML = "Your ship, the "+player.ships[q].type, player.ships[q].name+", has sunk from enemy fire at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+".";
-  srk_rpt.innerHTML = "You have sunk the "+player.ships[q].type, player.ships[q].name+" at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+"."
+  dmg_rpt.innerHTML = "Damage control reports that our "+player.ships[q].type+", the "+player.ships[q].name+", has sunk from enemy fire at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+".";
+  srk_rpt.innerHTML = "Aerial reconnaissance reports that the "+player.ships[q].type+" "+player.ships[q].name+" has sunk at coordinates "+ String.fromCharCode(coords_tgt[0]+65)+(coords_tgt[1]+1)+"."
   cic_srk_rpt.style.display = "inline-block";
   player.ships_left--;
   console.log("BANG")
   if (player.ships_left < 1) {
-    gameOver(player);
+    gameOver(player, q);
   }
 }
 
 
 
 function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
-  console.log("All must be false except for the first")
   console.log(gaming, betweenTurns, placeShips, shellFired, grid_p1[y][x].beenHit)
   if (gaming == false) {return -1} // checking if the game is over
   if (betweenTurns) {return -1} // checking if the player is allowed to shoot
@@ -759,13 +767,15 @@ function fireAtCoords(grid_p1, grid_p2, p1, p2, y, x) {
 
 
 
-function gameOver(player) {
+function gameOver(player, q) {
   console.log(player.shots_fired, player.hits)
   console.log("Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired)+"%.");
   gaming = false;
   document.getElementById("turn").innerHTML = "Game Over: "+player.username+" has won with "+player.shots_fired+" shells fired, and an accuracy of "+Math.round(player.hits / player.shots_fired*100)+"%."
   document.getElementById("chgTrnBtn").style.display = "none";
   document.getElementById("changeView").style.display = "block";
+  srk_rpt.innerHTML = "With the destruction of the "+player.ships[q].type+" "+player.ships[q].name+", the last of "+player.username+"'s fleet has been destroyed, and you have claimed victory."
+  dmg_rpt.innerHTML = "With the destruction of the "+player.ships[q].type+" "+player.ships[q].name+", the last of our fleet has been destroyed and we have lost the battle."
 }
 
 
