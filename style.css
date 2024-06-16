@@ -32,3 +32,28 @@ body {
     padding: 30px;
 }
 
+a {
+    display:inline-block;
+    padding: 10px;
+    border: 1px solid black;
+
+}
+
+.links {
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+}
+
+#rulesWindow {
+    position: absolute;
+    display: none;
+    text-align: center;
+    background-color: rgba(205,205,205,1);
+    border: 2px solid black;
+    border-radius: 15px;
+    margin: auto;
+    padding: 30px;
+}

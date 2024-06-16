@@ -11,11 +11,10 @@
 </head>
 
 <body>
-
     <div id="changeTurnDiv">
         <button id="chgTrnBtn" onclick="finishTurn()">I'm Done My Turn</button>
         <button id="changeView" onclick="swapScreen()">Switch Grid</button>
-        <span id="turn">Player 1, enter a username.</span>
+        <span id="turn">Player 1, enter a username and password.</span>
     </div>
 
     <div id="tgt_cvs_div">
@@ -33,6 +32,13 @@
         <button class="close" onclick="close_cic_rpt()">Close Strike Report</button>
     </div>
 
+    <div id="rulesWindow">
+        Quick Summary of the Rules:
+        <br>
+        Take turns to shoot at ships. The first player to destroy all five of the other player's ships wins. Click on the right grid to shoot at it. White is a miss, red is a hit. Shoot around tiles you hit to find where the ship is until it is destroyed.
+        <button class="close" onclick="rulesButton()">Close</button>
+    </div>
+
     <div id="player_init">
         <label for="user_box">Enter a username </label>
         <input type="text" id="user_box">
@@ -48,7 +54,8 @@
         <input type="password" id="password">
         <input type="submit" value="Confirm" onclick="password()">
     </div>
-
+    <br>
+    <button id="rules" onclick="rulesButton()">Rules</button>
 
 
     <hr>

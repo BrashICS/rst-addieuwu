@@ -347,6 +347,16 @@ function initGame() {
 
 
 
+function rulesButton() {
+  if(document.getElementById("rulesWindow").style.display == "none") {
+    document.getElementById("rulesWindow").style.display = "inline-block"
+  } else {
+    document.getElementById("rulesWindow").style.display = "none"
+  }
+}
+
+
+
 
 
 ///////////////////////////////////////////   turn swapping   ///////////////////////////////////////////
@@ -367,7 +377,7 @@ function playerCreation() {
     document.getElementById("user_box").value = ""
     document.getElementById("pswd_box").value = ""
 
-    document.getElementById("turn").innerHTML = "Player 2, enter a username."
+    document.getElementById("turn").innerHTML = "Player 2, enter a username and password."
   } else {
     if (document.getElementById("user_box").value != ""){
       player_2.username = document.getElementById("user_box").value
