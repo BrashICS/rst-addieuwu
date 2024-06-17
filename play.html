@@ -16,10 +16,24 @@
         <button id="changeView" onclick="swapScreen()">Switch Grid</button>
         <span id="turn">Player 1, enter a username and password.</span>
     </div>
-
-    <div id="tgt_cvs_div">
+    <div id="player_init">
+        <label for="user_box">Enter a username </label>
+        <input type="text" id="user_box">
+        <br>
+        <label for="pswd_box">Enter a password </label>
+        <input type="password" id="pswd_box">
+        <br>
+        <button onclick="playerCreation()">Confirm</button>
     </div>
 
+    <div id="password_div">
+        <label for="password" id="pswdBoxTxt">Please enter your password to reveal your screen.</label>
+        <input type="password" id="password">
+        <input type="submit" value="Confirm" onclick="password()">
+    </div>
+    <div id="tgt_cvs_div">
+    </div>
+    <hr>
     <div id="cic_damage_report" class="report">
         <span id="damage_report">Your vessels are all in functional condition.</span>
         <br>
@@ -33,32 +47,34 @@
     </div>
 
     <div id="rulesWindow">
-        Quick Summary of the Rules:
+        <p id="rules">
+            Quick Summary of the Rules:
+            <br>
+            Take turns to shoot at ships. The first player to destroy all five of the other player's ships wins. Click on a tile on the right grid to shoot at that tile. White is a miss, red is a hit. Shoot around tiles where you hit ships to find where the ship is until it is destroyed.
+        </p>
+
+        <br><br>
+        Controls:
         <br>
-        Take turns to shoot at ships. The first player to destroy all five of the other player's ships wins. Click on the right grid to shoot at it. White is a miss, red is a hit. Shoot around tiles you hit to find where the ship is until it is destroyed.
+        <p id="controls">
+            <b>UP:</b> W, UPARROW, NUMPAD_7,8,9 <br>
+            <b>LEFT:</b> A, LEFTARROW, NUMPAD_1,4,7 <br>
+            <b>DOWN:</b> S, DOWNARROW, NUMPAD_1,2,3 <br>
+            <b>RIGHT:</b> D, RIGHTARROW, NUMPAD_3,6,9 <br>
+            Pressing the numpad keys in the corners will move the ship diagonally in that direction. <br>
+            <b>ROTATE:</b> R, NUMPAD_PLUS <br>
+            <b>CONFIRM:</b> SPACE, ENTER, NUMPAD_ENTER <br>
+            <b>SHOOT: </b> LEFTCLICK <br>
+            <b>HIGHLIGHT:</b> RIGHTCLICK <br>
+        </p>
+
         <button class="close" onclick="rulesButton()">Close</button>
-    </div>
-
-    <div id="player_init">
-        <label for="user_box">Enter a username </label>
-        <input type="text" id="user_box">
-        <br>
-        <label for="pswd_box">Enter a password </label>
-        <input type="password" id="pswd_box">
-        <br>
-        <input type="submit" value="Confirm" onclick="playerCreation()">
-    </div>
-
-    <div id="password_div">
-        <label for="password" id="pswdBoxTxt">Please enter your password to reveal your screen.</label>
-        <input type="password" id="password">
-        <input type="submit" value="Confirm" onclick="password()">
     </div>
     <br>
     <button id="rules" onclick="rulesButton()">Rules</button>
 
 
-    <hr>
+
     <div id="debug">
     </div>
 

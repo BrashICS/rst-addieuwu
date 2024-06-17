@@ -16,10 +16,10 @@
 
 
 
-
-
-const CVS_WIDTH = 660;
-const CVS_HEIGHT = 300;
+const SCR_WIDTH = Math.round(innerWidth / 100 * 80);
+const CVS_WIDTH = SCR_WIDTH;
+const CVS_HEIGHT = SCR_WIDTH / 2.2;
+// makes grid same size as screen for pwetty
 const ROWS = 10;
 const COLS = 22; // the two grids are the same grid, they are separated by a 2 tile wide gap of nothing tiles
 
@@ -178,7 +178,7 @@ class Ship {
   #seaworthy = true; // if ship is still alive
   #coords = []; // coordinates for each section of the ship
   #name; // name of ship, used for text alert when the ship has been destroyed
-  bingus = "bingus"; // bingus
+  bingus = "bingus"; // bingus // bingus used to live in the Compartment object but i didnt need that so he's moved here
   // #coordinates;
   #rotation;
 
@@ -212,7 +212,7 @@ class Ship {
     }
     this.#seaworthy = false;
     return false;
-  }
+  } // checks if the ship is still alive
 }
 
 
@@ -250,7 +250,8 @@ function setup() {
 function draw() {
 
   // frames++;
-  // if (frames > 20) {frames = 1; console.log(": seconds")}
+  // if (frames > 60) {frames = 1; console.log(": seconds")}
+  // above was an ineffective attempt to make an accurate timing system, but the 60fps isnt a constant so it doesn't actually count correctly
   if (turn == 1) {
     draw_grid(tgt_p1_grid, COLS, ROWS);
   } else if (turn == -1) {
@@ -274,7 +275,7 @@ function draw_grid(grid, x, y) {
   let activeX = (mouseX - (mouseX % tileX)) / tileX;
   let activeY = (mouseY - (mouseY % tileY)) / tileY;
 
-5
+
   cursor(ARROW);
 
   for (let row = 0; row < y; row++) {
@@ -284,11 +285,11 @@ function draw_grid(grid, x, y) {
       } else {stroke([5,51,128])}
       if (col == 10 || col == 11) {
         noStroke();
-        grid[row][col].colour = "white"
+        grid[row][col].colour = "white";
       }
        if (activeX < COLS && activeY < ROWS && activeX > 11) {
-      // grid[activeY][activeX]
-      // stroke("green")
+      // grid[activeY][activeX];
+      // stroke("green");
 
       cursor(CROSS)
     }
@@ -335,7 +336,7 @@ function grid_gen(grid) {
     }
   }
   return grid;
-}
+} // i make-a da pizza(grid)
 
 
 
@@ -353,7 +354,7 @@ function rulesButton() {
   } else {
     document.getElementById("rulesWindow").style.display = "none"
   }
-}
+} // toggle to show the quick rules summary on and off
 
 
 
@@ -397,16 +398,14 @@ function playerCreation() {
     playerSetup = false;
   }
 
-
-
-}
+} // changes elements at the beginning of gameplay for setup
 
 
 
 function finishTurn() {
+  // begins changing turn sequence
   betweenTurns = true;
   if (shellFired == false && placeShips == false) {return -1}
-  // begins changing turn sequence
   turn *= -1;
   shellFired = false;
 
@@ -415,7 +414,7 @@ function finishTurn() {
   pswd_div.style.display = "block";
   cic_dmg_rpt.style.display = "none";
   cic_srk_rpt.style.display = "none";
-
+  // resets all the displays to default
 
   if (turn == 1) {
     preparePlayer(player_1, tgt_p1_grid);
@@ -432,6 +431,7 @@ function preparePlayer(player, grid) {
   grid[prevActive[0]][prevActive[1]].resetColour();
   document.getElementById("turn").innerHTML = player.username+"'s turn";
   pswdBoxTxt.innerHTML = player.username+", please enter your password to reveal your screen.";
+  // redraws grid and updates text
 }
 
 
@@ -456,19 +456,15 @@ function password(player) {
       cic_dmg_rpt.style.display = "inline-block";
       recentlyHit = false;
     }
-
-
-  } else {
-    // console.log("LOUD INCORRECT BUZZER")
   }
-}
+} // checks password when input box is confirmed
 
 
 
 function close_cic_rpt() {
   cic_dmg_rpt.style.display = "none";
   cic_srk_rpt.style.display = "none";
-}
+} // closes cic reports, as name says
 
 
 
@@ -532,7 +528,7 @@ function placing_ships(player, grid, keyCode) {
 
   let shpLng = player.ships[a_s].loc.length;
 
-  if (keyCode ===  98 || keyCode === 83 || keyCode === 40) {
+  if (keyCode ===  98 || keyCode === 97 || keyCode === 99 || keyCode === 83 || keyCode === 40) {
     // console.log("DOWN")
     if ((tgt_r == 1 && tgt_y+shpLng<10) || (tgt_r != 1 && tgt_y<9)) {
       tgt_y++
@@ -540,7 +536,7 @@ function placing_ships(player, grid, keyCode) {
     } else {return -1}
   } // up     // W, NUMPAD_8, UP_ARROW
 
-  if (keyCode === 100 || keyCode === 65 || keyCode === 37) {
+  if (keyCode === 100 || keyCode === 103 || keyCode === 97 || keyCode === 65 || keyCode === 37) {
     // console.log("LEFT")
     if ((tgt_x>0)) {
       tgt_x--
@@ -549,7 +545,7 @@ function placing_ships(player, grid, keyCode) {
 
   } // left   // A, NUMPAD_4, LEFT_ARROW
 
-  if (keyCode === 102 || keyCode === 68 || keyCode === 39) {
+  if (keyCode === 102 || keyCode === 105 || keyCode === 99 || keyCode === 68 || keyCode === 39) {
     // console.log("RIGHT")
     if ((tgt_r == -1 && tgt_x+shpLng<10) || (tgt_r != -1 && tgt_x<9)) {
       tgt_x++
@@ -558,10 +554,11 @@ function placing_ships(player, grid, keyCode) {
 
   } // right  // D, NUMPAD_6, RIGHT_ARROW
 
-  if (keyCode === 104 || keyCode === 87 || keyCode === 38) {
+  if (keyCode === 104 || keyCode === 103 || keyCode === 105 || keyCode === 87 || keyCode === 38) {
     // console.log("UP")
     if ((tgt_y>0)) {
       tgt_y-- // not sure i actually need this but i kinda like it so i'm keeping it
+              // oh nevermind yes i do need it, this keeps the ships in the grid lmao
       moveShip(grid, player, shpLng, 0, -1);
     } else {return -1}
 
@@ -605,7 +602,7 @@ function placing_ships(player, grid, keyCode) {
       drawShip(tgt_p2_grid, player_2.ships[a_s].loc)
     }
   } // confirm // SPACE, ENTER, NUMPAD_ENTER
-}
+} // all the shtuff for the ship setup phase of the game
 
 
 
@@ -798,7 +795,8 @@ function swapScreen() {
 
 
 function keyPressed() {
-  if (gaming == false) {return -1} // checking if game is over
+  // so much error checking (not really)
+  if (gaming == false) {return -1}
   if (betweenTurns == true) {return -1}
   if (playerSetup == true) {return -1}
   if (placeShips) {
@@ -818,7 +816,7 @@ function keyPressed() {
   /*
   if (keyCode === 18) {
     finishTurn();
-  } // just for testing so i can hotswap player turns
+  } // lalt, maybe lshift i dont remember. just for testing so i can hotswap player turns
   */
 }
 
@@ -862,4 +860,4 @@ function mousePressed(event) {
 
 // function log(str) {
 //   document.getElementById("debug").innerHTML += "<br>" + str.toString();
-// } // not working, don't know why, not gonna fix
+// } // not working, don't know why, probably cus i just copypasted it, not gonna fix

@@ -36,6 +36,7 @@ a {
     display:inline-block;
     padding: 10px;
     border: 1px solid black;
+    width: 50px;
 
 }
 
@@ -50,10 +51,18 @@ h1 {
 #rulesWindow {
     position: absolute;
     display: none;
-    text-align: center;
+    width: 50%;
     background-color: rgba(205,205,205,1);
     border: 2px solid black;
     border-radius: 15px;
     margin: auto;
     padding: 30px;
+}
+
+#rules {
+    text-align: center;
+}
+
+#controls {
+    text-align: left;
 }
